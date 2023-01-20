@@ -1,7 +1,8 @@
-import { Column, Entity, ManyToMany } from 'typeorm';
+import { Column, Entity, JoinTable, ManyToMany } from 'typeorm';
 import { BaseEntity } from '../../../common/entities/base.entity';
 import { Menu } from './menu.entity';
 import { ActionEnum } from '../../../common/enum/action.enum';
+import { Role } from '../../roles/entities/roles.entity';
 
 @Entity()
 export class Permission extends BaseEntity {
@@ -19,4 +20,11 @@ export class Permission extends BaseEntity {
 
   @ManyToMany(() => Menu, (menu) => menu.permissions)
   menus: Menu[];
+
+  @ManyToMany(() => Role, (role) => role.permissions, {
+    onUpdate: 'CASCADE',
+    onDelete: 'CASCADE',
+  })
+  @JoinTable()
+  roles: Role[];
 }

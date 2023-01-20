@@ -25,7 +25,10 @@ export class RolesService {
     } else if (typeof condition === 'string') {
       where = { name: condition };
     }
-    return await this.roleRepository.findOne({ where });
+    return await this.roleRepository.findOne({
+      where,
+      relations: ['menus', 'permissions'],
+    });
   }
 
   async findAll(query: GetRoleDto): Promise<ResultData> {
@@ -54,8 +57,36 @@ export class RolesService {
     }
     const role = await this.roleRepository.create({ name });
     const menuList = await this.menuService.findMenuByKeys(menus);
-    const newRole = await this.roleRepository.merge(role, { menus: menuList });
+    const permissionList = await this.menuService.findPermissionByKeys(menus);
+    const newRole = await this.roleRepository.merge(role, {
+      menus: menuList,
+      permissions: permissionList,
+    });
     await this.roleRepository.save(newRole);
     return ResultData.success('创建角色成功', newRole);
+  }
+
+  async update(id: number, updateRoleDto: CreateRoleDto): Promise<ResultData> {
+    const { name, menus } = updateRoleDto;
+    const role = await this.findOne(id);
+    if (!role) {
+      return ResultData.error(HttpCodeEnum.BAD_REQUEST, '角色不存在');
+    }
+    const menuList = await this.menuService.findMenuByKeys(menus);
+    const permissionList = await this.menuService.findPermissionByKeys(menus);
+    role.name = name;
+    role.menus = menuList;
+    role.permissions = permissionList;
+    await this.roleRepository.save(role);
+    return ResultData.success('更新角色成功', role);
+  }
+
+  async delete(id: number): Promise<ResultData> {
+    const role = await this.findOne(id);
+    if (!role) {
+      return ResultData.error(HttpCodeEnum.BAD_REQUEST, '角色不存在');
+    }
+    await this.roleRepository.remove(role);
+    return ResultData.success('删除角色成功');
   }
 }

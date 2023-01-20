@@ -3,6 +3,7 @@ import { User } from '../../users/entities/users.entity';
 import { StatusEnum } from '../../../common/enum/config.enum';
 import { BaseEntity } from '../../../common/entities/base.entity';
 import { Menu } from '../../menu/entities/menu.entity';
+import { Permission } from '../../menu/entities/permission.entity';
 
 @Entity()
 export class Role extends BaseEntity {
@@ -29,6 +30,11 @@ export class Role extends BaseEntity {
   @OneToMany(() => User, (user) => user.role)
   users: User[];
 
-  @ManyToMany(() => Menu, (menu) => menu.roles)
+  @ManyToMany(() => Menu, (menu) => menu.roles, { cascade: true })
   menus: Menu[];
+
+  @ManyToMany(() => Permission, (permission) => permission.roles, {
+    cascade: true,
+  })
+  permissions: Permission[];
 }

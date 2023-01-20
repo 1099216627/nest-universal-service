@@ -87,7 +87,10 @@ export class Menu extends BaseEntity {
   @Column({ nullable: false, unique: true })
   key: string;
 
-  @ManyToMany(() => Role, (role) => role.menus)
+  @ManyToMany(() => Role, (role) => role.menus, {
+    onUpdate: 'CASCADE',
+    onDelete: 'CASCADE',
+  })
   @JoinTable()
   roles: Role[];
 

@@ -9,6 +9,8 @@ import { Permission } from './entities/permission.entity';
 export class MenuService {
   constructor(
     @InjectRepository(Menu) private readonly menuRepository: Repository<Menu>,
+    @InjectRepository(Permission)
+    private readonly perRepository: Repository<Permission>,
   ) {}
 
   async findAll(): Promise<ResultData> {
@@ -20,32 +22,36 @@ export class MenuService {
 
   async findUserMenus(req): Promise<ResultData> {
     const role = req.user.role;
-    const result = await this.menuRepository.find({
-      relations: ['permissions'],
+    const menus = await this.menuRepository.find({
       where: {
         roles: {
           id: role.id,
         },
       },
     });
-    const permissions = result.map((item) => item.permissions).flat();
-    const menus = result.map((item) => {
-      delete item.permissions;
-      return item;
+    const permissions = await this.perRepository.find({
+      where: {
+        roles: {
+          id: role.id,
+        },
+      },
     });
     return ResultData.success('获取用户菜单成功', { permissions, menus });
   }
 
   async findMenuByKeys(keys: string[]): Promise<Menu[]> {
-    return await this.menuRepository
-      .createQueryBuilder('menu')
-      .where('menu.key IN (:...keys)', { keys })
-      .leftJoinAndSelect(
-        'menu.permissions',
-        'permissions',
-        'permissions.key In (:...keys)',
-        { keys },
-      )
-      .getMany();
+    return await this.menuRepository.find({
+      where: {
+        key: In(keys),
+      },
+    });
+  }
+
+  async findPermissionByKeys(keys: string[]): Promise<Permission[]> {
+    return await this.perRepository.find({
+      where: {
+        key: In(keys),
+      },
+    });
   }
 }
