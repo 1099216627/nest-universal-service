@@ -5,7 +5,7 @@ import {
   NestInterceptor,
 } from '@nestjs/common';
 import { Observable, tap } from 'rxjs';
-import { LogsService } from '../modules/logs/logs.service';
+import { LoggerService } from '../modules/logger/logger.service';
 import * as requestIp from 'request-ip';
 /**
  * 日志系统
@@ -13,7 +13,7 @@ import * as requestIp from 'request-ip';
  */
 @Injectable()
 export class LoggerInterceptor implements NestInterceptor {
-  constructor(private readonly loggerService: LogsService) {}
+  constructor(private readonly loggerService: LoggerService) {}
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     const request = context.switchToHttp().getRequest();
     const method = request.method;

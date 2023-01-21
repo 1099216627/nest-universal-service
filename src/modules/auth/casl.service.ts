@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { AbilityBuilder, createMongoAbility } from '@casl/ability';
 import { ActionEnum } from '../../common/enum/action.enum';
-import { Log } from '../logs/entities/logs.entity';
+import { Logger } from '../logger/entities/logger.entity';
 import { UsersService } from '../users/users.service';
 import { User } from '../users/entities/users.entity';
 import { Menu } from '../menu/entities/menu.entity';
@@ -31,7 +31,7 @@ export class CaslService {
       user: User,
       menu: Menu,
       role: Role,
-      log: Log,
+      log: Logger,
     };
     if (map[key]) {
       return map[key];

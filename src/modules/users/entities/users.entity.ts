@@ -1,5 +1,5 @@
 import { Column, Entity, ManyToOne, OneToMany, OneToOne } from 'typeorm';
-import { Log } from '../../logs/entities/logs.entity';
+import { Logger } from '../../logger/entities/logger.entity';
 import { Profile } from '../../profile/entities/profile.entity';
 import { Role } from '../../roles/entities/roles.entity';
 import { Exclude } from 'class-transformer';
@@ -24,8 +24,8 @@ export class User extends BaseEntity {
   })
   status: AccountStatusEnum;
 
-  @OneToMany(() => Log, (log) => log.user, { cascade: true })
-  logs: Log[];
+  @OneToMany(() => Logger, (log) => log.user, { cascade: true })
+  logs: Logger[];
 
   @OneToOne(() => Profile, (profile) => profile.user, {
     cascade: true, //级联操作

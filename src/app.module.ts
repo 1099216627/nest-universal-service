@@ -4,7 +4,7 @@ import { ConfigModule } from '@nestjs/config';
 import * as Joi from 'joi'; //joi是一个用于验证的库
 import * as dotenv from 'dotenv';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { LogsModule } from './modules/logs/logs.module';
+import { LoggerModule } from './modules/logger/logger.module';
 import { RolesModule } from './modules/roles/roles.module';
 import { ProfileModule } from './modules/profile/profile.module';
 import { connectionOptions } from '../ormconfig';
@@ -40,7 +40,7 @@ const envFilePath = `.env.${process.env.NODE_ENV || 'development'}`; //env区分
       }),
     }),
     TypeOrmModule.forRoot(connectionOptions),
-    LogsModule,
+    LoggerModule,
     RolesModule,
     ProfileModule,
     AuthModule,
