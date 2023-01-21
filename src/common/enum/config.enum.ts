@@ -34,3 +34,9 @@ export enum IsBooleanEnum {
   YES = 1,
   NO = 0,
 }
+
+export enum AccountStatusEnum {
+  ENABLED = 1,
+  DISABLE = 2,
+  DELETE = 3,
+}

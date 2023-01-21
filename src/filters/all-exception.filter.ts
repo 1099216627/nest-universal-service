@@ -51,7 +51,6 @@ export class AllExceptionFilter implements ExceptionFilter {
       method: request.method,
       url: request.url,
     };
-
     const responseBody = {
       code: status,
       data: null,

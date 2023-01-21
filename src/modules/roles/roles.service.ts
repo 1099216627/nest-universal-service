@@ -40,6 +40,9 @@ export class RolesService {
       },
       skip,
       take,
+      order: {
+        createdAt: 'DESC',
+      },
     });
     const pagination = generatePaginationData(
       total,

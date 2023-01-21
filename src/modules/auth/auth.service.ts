@@ -1,4 +1,4 @@
-import { HttpException, Injectable, Req } from '@nestjs/common';
+import { HttpException, Injectable } from '@nestjs/common';
 import { UsersService } from '../users/users.service';
 import { SigninUserDto } from './dto/signin-user.dto';
 import { JwtService } from '@nestjs/jwt';
@@ -6,6 +6,8 @@ import * as bcrypt from 'bcrypt';
 import { ResultData } from '../../common/utils';
 import { HttpCodeEnum } from '../../common/enum/http-code.enum';
 import { User } from '../users/entities/users.entity';
+import { AccountStatusEnum } from '../../common/enum/config.enum';
+
 @Injectable()
 export class AuthService {
   constructor(
@@ -18,8 +20,13 @@ export class AuthService {
     if (!user) {
       return ResultData.error(HttpCodeEnum.UNAUTHORIZED, '用户名或密码错误');
     }
+    if (
+      user.status === AccountStatusEnum.DISABLE ||
+      user.status === AccountStatusEnum.DELETE
+    ) {
+      return ResultData.error(HttpCodeEnum.UNAUTHORIZED, '用户已被禁用');
+    }
     const isMatch = await bcrypt.compare(password, user.password);
-    console.log(user.password, password, 'isMatch');
     if (!isMatch) {
       return ResultData.error(HttpCodeEnum.UNAUTHORIZED, '用户名或密码错误');
     }

@@ -12,9 +12,10 @@ import { AuthService } from './auth.service';
 import { SigninUserDto } from './dto/signin-user.dto';
 import { JwtGuard } from '../../guards/jwt.guard';
 import { ResultData } from '../../common/utils';
+import { LoggerInterceptor } from '../../interceptors/logger.interceptor';
 
 @Controller('auth')
-@UseInterceptors(ClassSerializerInterceptor)
+@UseInterceptors(ClassSerializerInterceptor, LoggerInterceptor)
 export class AuthController {
   constructor(private authService: AuthService) {}
 

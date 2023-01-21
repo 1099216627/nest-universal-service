@@ -1,10 +1,4 @@
 import { SelectQueryBuilder } from 'typeorm';
-import { User } from '../../modules/users/entities/users.entity';
-import { Role } from '../../modules/roles/entities/roles.entity';
-import { Log } from '../../modules/logs/entities/logs.entity';
-import { Menu } from '../../modules/menu/entities/menu.entity';
-import { BaseEntity } from '../entities/base.entity';
-
 export function getPageAndLimit(page: number, limit: number) {
   const _limit = limit || 10;
   const _page = page || 1;
@@ -54,7 +48,7 @@ export function generatePaginationData(
   limit?: number,
 ) {
   const pages = Math.ceil(total / (limit || 10));
-  const size = limit || 10;
+  const size = limit || 20;
   return {
     total,
     page,
@@ -77,4 +71,12 @@ export function formatDate(date: Date | string) {
   return (
     year + '-' + month + '-' + day + ' ' + hour + ':' + minute + ':' + second
   );
+}
+
+export function isVoid(value: any) {
+  return value === undefined || value === null || value === '';
+}
+
+export function randomNickname(): string {
+  return '用户' + Math.random().toString(36).substring(2, 10);
 }

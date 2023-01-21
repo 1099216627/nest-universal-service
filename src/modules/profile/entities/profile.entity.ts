@@ -6,23 +6,31 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { User } from '../../users/entities/users.entity';
+import { GenderEnum } from '../../../common/enum/config.enum';
 
 @Entity()
 export class Profile {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
-  gender: number;
+  @Column({ type: 'enum', enum: GenderEnum, default: GenderEnum.MALE })
+  gender: GenderEnum;
 
-  @Column()
+  @Column({ type: 'varchar', length: 20, nullable: true })
   phone: string;
 
-  @Column()
+  @Column({ type: 'varchar', length: 255, nullable: true })
   address: string;
+
+  @Column({ type: 'varchar', length: 255, nullable: true })
+  avatar: string;
+
+  @Column({ type: 'varchar', length: 20, nullable: true })
+  nickname: string;
 
   @OneToOne(() => User, {
     onDelete: 'CASCADE',
+    onUpdate: 'CASCADE',
   })
   @JoinColumn()
   user: User;

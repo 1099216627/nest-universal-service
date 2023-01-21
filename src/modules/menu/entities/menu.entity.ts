@@ -1,12 +1,4 @@
-import {
-  Column,
-  Entity,
-  JoinColumn,
-  JoinTable,
-  ManyToMany,
-  ManyToOne,
-  OneToOne,
-} from 'typeorm';
+import { Column, Entity, JoinTable, ManyToMany } from 'typeorm';
 import { BaseEntity } from '../../../common/entities/base.entity';
 import { Role } from '../../roles/entities/roles.entity';
 import { IsBooleanEnum } from '../../../common/enum/config.enum';
@@ -76,6 +68,7 @@ export class Menu extends BaseEntity {
 
   @Column({
     type: 'varchar',
+    nullable: true,
   })
   redirect: string;
 

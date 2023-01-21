@@ -10,6 +10,7 @@ import { ProfileModule } from './modules/profile/profile.module';
 import { connectionOptions } from '../ormconfig';
 import { AuthModule } from './modules/auth/auth.module';
 import { MenuModule } from './modules/menu/menu.module';
+import { UploadModule } from './modules/upload/upload.module';
 const envFilePath = `.env.${process.env.NODE_ENV || 'development'}`; //env区分环境
 
 @Global()
@@ -45,6 +46,7 @@ const envFilePath = `.env.${process.env.NODE_ENV || 'development'}`; //env区分
     AuthModule,
     UsersModule,
     MenuModule,
+    UploadModule,
   ],
   providers: [Logger],
   exports: [Logger],

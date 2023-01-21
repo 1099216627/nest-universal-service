@@ -14,45 +14,49 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { UsersService } from './users.service';
-import { User } from './entities/users.entity';
 import { GetUserDto } from './dto/get-user.dto';
 import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateResult } from 'typeorm';
 import { JwtGuard } from '../../guards/jwt.guard';
 import { ResultData } from '../../common/utils';
+import { LoggerInterceptor } from '../../interceptors/logger.interceptor';
+import { BatchDeleteDto } from './dto/batch-delete.dto';
 
 @Controller('user')
-@UseInterceptors(ClassSerializerInterceptor)
+@UseGuards(JwtGuard)
+@UseInterceptors(ClassSerializerInterceptor, LoggerInterceptor)
 export class UsersController {
   constructor(
     private configService: ConfigService,
     private readonly userService: UsersService,
   ) {}
   //获取所有用户
-  @UseGuards(JwtGuard)
   @Get()
   async getAllUsers(@Query() getUsersDto: GetUserDto): Promise<ResultData> {
     return await this.userService.findAll(getUsersDto);
   }
   //创建用户
-  @UseGuards(JwtGuard)
   @Post()
   async createUser(@Body() dto: CreateUserDto): Promise<ResultData> {
     return await this.userService.create(dto);
   }
+
+  @Delete('batch')
+  async delete(@Body() batchDeleteDto: BatchDeleteDto): Promise<ResultData> {
+    return await this.userService.batchDelete(batchDeleteDto);
+  }
+
   //删除用户
-  @UseGuards(JwtGuard)
   @Delete('/:id')
-  async deleteUser(@Param('id') id: number): Promise<User> {
+  async deleteUser(@Param('id') id: number): Promise<ResultData> {
     return await this.userService.delete(id);
   }
+
   //更新用户
-  @UseGuards(JwtGuard)
   @Put('/:id')
   async updateUser(
-    @Param('id') id: number,
-    @Body() dto: CreateUserDto,
-  ): Promise<UpdateResult> {
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: Partial<CreateUserDto>,
+  ): Promise<any> {
     return await this.userService.update(id, dto);
   }
 }

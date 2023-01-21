@@ -12,7 +12,7 @@ export class CaslService {
   constructor(private readonly userService: UsersService) {}
 
   async forRoot(id: number) {
-    const { build, can, cannot } = new AbilityBuilder(createMongoAbility);
+    const { build, can } = new AbilityBuilder(createMongoAbility);
     const permission = await this.userService.findUserPermissions(id);
     permission.forEach((item) => {
       const { action, controller } = item;
