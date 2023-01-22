@@ -38,7 +38,7 @@ export class LoggerService {
   }
 
   async create(dto: CreateLogDto) {
-    const { userId, method, time, path, ip, code } = dto;
+    const { userId, method, time, path, ip, code, name } = dto;
     const user = await this.userService.findOne(userId);
     const log = await this.logsRepository.create({
       user,
@@ -46,6 +46,7 @@ export class LoggerService {
       time,
       path,
       code,
+      name,
       ip,
     });
     return await this.logsRepository.save(log);

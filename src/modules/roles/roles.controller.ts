@@ -9,6 +9,7 @@ import {
   Put,
   Query,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { RolesService } from './roles.service';
 import { CreateRoleDto } from './dto/create-role.dto';
@@ -19,26 +20,32 @@ import { ResultData } from '../../common/utils';
 import { Can } from '../../decorators/casl.decorator';
 import { ActionEnum } from '../../common/enum/action.enum';
 import { Role } from './entities/roles.entity';
+import { LoggerInterceptor } from '../../interceptors/logger.interceptor';
+import { setRouteNameDecorator } from '../../decorators/set-route-name.decorator';
 
 @Controller('role')
 @UseGuards(JwtGuard, CaslGuard)
+@UseInterceptors(LoggerInterceptor)
 export class RolesController {
   constructor(private readonly rolesService: RolesService) {}
 
   @Get()
   @Can(ActionEnum.READ, Role)
+  @setRouteNameDecorator('查询所有角色')
   async findAllRoles(@Query() query: GetRoleDto) {
     return await this.rolesService.findAll(query);
   }
 
   @Post()
   @Can(ActionEnum.CREATE, Role)
+  @setRouteNameDecorator('创建角色')
   async createUser(@Body() createRoleDto: CreateRoleDto) {
     return await this.rolesService.create(createRoleDto);
   }
 
   @Get(':id')
   @Can(ActionEnum.READ, Role)
+  @setRouteNameDecorator('查询角色')
   async findOneRole(@Param('id', ParseIntPipe) id: number) {
     const result = await this.rolesService.findOne(id);
     return ResultData.success('获取用户信息成功', result);
@@ -46,6 +53,7 @@ export class RolesController {
 
   @Put(':id')
   @Can(ActionEnum.UPDATE, Role)
+  @setRouteNameDecorator('更新角色')
   async updateRole(
     @Param('id', ParseIntPipe) id: number,
     @Body() createRoleDto: CreateRoleDto,
@@ -55,6 +63,7 @@ export class RolesController {
 
   @Delete(':id')
   @Can(ActionEnum.DELETE, Role)
+  @setRouteNameDecorator('删除角色')
   async deleteRole(@Param('id', ParseIntPipe) id: number) {
     return await this.rolesService.delete(id);
   }

@@ -2,6 +2,7 @@ import {
   Controller,
   Post,
   UploadedFile,
+  UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import { UploadService } from './upload.service';
@@ -10,12 +11,18 @@ import * as multer from 'multer';
 import * as process from 'process';
 import { ResultData } from '../../common/utils';
 import { HttpCodeEnum } from '../../common/enum/http-code.enum';
+import { LoggerInterceptor } from '../../interceptors/logger.interceptor';
+import { JwtGuard } from '../../guards/jwt.guard';
+import { setRouteNameDecorator } from '../../decorators/set-route-name.decorator';
 
 @Controller('upload')
+@UseGuards(JwtGuard)
+@UseInterceptors(LoggerInterceptor)
 export class UploadController {
   constructor(private readonly uploadService: UploadService) {}
 
   @Post('image')
+  @setRouteNameDecorator('上传图片')
   @UseInterceptors(
     FileInterceptor('file', {
       storage: multer.diskStorage({

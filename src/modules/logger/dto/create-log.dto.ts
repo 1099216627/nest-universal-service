@@ -3,6 +3,9 @@ import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
 export class CreateLogDto {
   @IsString()
   @IsNotEmpty()
+  name: string;
+  @IsString()
+  @IsNotEmpty()
   path: string;
 
   @IsString()

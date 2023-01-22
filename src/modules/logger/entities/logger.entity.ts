@@ -5,6 +5,8 @@ import { BaseEntity } from '../../../common/entities/base.entity';
 @Entity()
 export class Logger extends BaseEntity {
   @Column()
+  name: string;
+  @Column()
   path: string;
 
   @Column()
