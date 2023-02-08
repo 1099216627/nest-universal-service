@@ -64,6 +64,20 @@ export class UsersController {
     return await this.userService.delete(id);
   }
 
+  @Put('disable/:id')
+  @Can(ActionEnum.UPDATE, User)
+  @setRouteNameDecorator('禁用用户')
+  async disableUser(@Param('id') id: number): Promise<ResultData> {
+    return await this.userService.disableUser(id);
+  }
+
+  @Put('enable/:id')
+  @Can(ActionEnum.UPDATE, User)
+  @setRouteNameDecorator('启用用户')
+  async enableUser(@Param('id') id: number): Promise<ResultData> {
+    return await this.userService.enableUser(id);
+  }
+
   //更新用户
   @Put('/:id')
   @Can(ActionEnum.UPDATE, User)

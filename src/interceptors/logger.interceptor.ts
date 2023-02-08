@@ -20,7 +20,7 @@ export class LoggerInterceptor implements NestInterceptor {
     const path = request.url;
     const ip = requestIp.getClientIp(request);
     const startTime = Date.now();
-    const userId = request.user.id;
+    const userId = request.user?.id ?? null;
     const name = Reflect.getMetadata('name', context.getHandler());
     return next.handle().pipe(
       tap(

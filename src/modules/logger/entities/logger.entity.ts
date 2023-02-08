@@ -18,7 +18,7 @@ export class Logger extends BaseEntity {
   @Column({ comment: '耗时时间', type: 'int' })
   time: number;
 
-  @Column({ comment: '请求code码', type: 'int' })
+  @Column({ comment: '请求code码', type: 'int', default: 200 })
   code: number;
 
   @ManyToOne(() => User, (user) => user.logs, {

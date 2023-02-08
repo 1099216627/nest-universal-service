@@ -8,6 +8,7 @@ import { GetLogsDto } from './dto/get-logs.dto';
 import {
   generatePaginationData,
   getPageAndLimit,
+  isVoid,
   ResultData,
 } from '../../common/utils';
 @Injectable()
@@ -39,7 +40,10 @@ export class LoggerService {
 
   async create(dto: CreateLogDto) {
     const { userId, method, time, path, ip, code, name } = dto;
-    const user = await this.userService.findOne(userId);
+    let user = null;
+    if (!isVoid(userId)) {
+      user = await this.userService.findOne(userId);
+    }
     const log = await this.logsRepository.create({
       user,
       method,

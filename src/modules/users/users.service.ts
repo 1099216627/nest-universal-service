@@ -132,6 +132,20 @@ export class UsersService {
     return ResultData.success('更新用户成功', user);
   }
 
+  async disableUser(id: number): Promise<ResultData> {
+    const user = await this.findOne(id);
+    user.status = AccountStatusEnum.DISABLE;
+    await this.userRepository.save(user);
+    return ResultData.success('禁用用户成功');
+  }
+
+  async enableUser(id: number): Promise<ResultData> {
+    const user = await this.findOne(id);
+    user.status = AccountStatusEnum.ENABLED;
+    await this.userRepository.save(user);
+    return ResultData.success('启用用户成功');
+  }
+
   async findOneByUsername(username: string): Promise<User> {
     return await this.userRepository.findOne({
       where: {
