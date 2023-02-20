@@ -38,24 +38,26 @@ export class UsersController {
   @Get('list')
   @Can(ActionEnum.READ, User)
   @setRouteNameDecorator('根据id集合查询用户列表')
-  async getUserListByIds (@Query('ids') ids):Promise<ResultData> {
-    return await this.userService.getList(ids)
+  async getUserListByIds(@Query('ids') ids): Promise<ResultData> {
+    return await this.userService.getList(ids);
   }
 
   //获取所有用户
   @Get()
   @Can(ActionEnum.READ, User)
   @setRouteNameDecorator('查询所有用户')
-  async getAllUsers(@Query() getUsersDto: GetUserDto): Promise<ResultData> {    
+  async getAllUsers(@Query() getUsersDto: GetUserDto): Promise<ResultData> {
     return await this.userService.findAll(getUsersDto);
   }
 
   @Can(ActionEnum.READ, User)
   @setRouteNameDecorator('查询用户详情')
   @Get(':id')
-  async getUserById(@Param('id', ParseIntPipe) id: number): Promise<ResultData> {    
-    const result =  await this.userService.findOne(id);
-    return ResultData.success("查询用户信息成功",result);
+  async getUserById(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<ResultData> {
+    const result = await this.userService.findOne(id);
+    return ResultData.success('查询用户信息成功', result);
   }
 
   //创建用户
@@ -65,7 +67,6 @@ export class UsersController {
   async createUser(@Body() dto: CreateUserDto): Promise<ResultData> {
     return await this.userService.create(dto);
   }
-
 
   @Delete('batch')
   @Can(ActionEnum.DELETE, User)

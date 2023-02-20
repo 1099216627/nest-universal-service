@@ -47,7 +47,7 @@ export class AuthService {
     return user;
   }
 
-  async logout(res): Promise<ResultData> {
+  async logout(): Promise<ResultData> {
     return ResultData.success('登出成功');
   }
 }

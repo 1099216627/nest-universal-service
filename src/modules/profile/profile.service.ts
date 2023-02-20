@@ -14,7 +14,7 @@ export class ProfileService {
     @InjectRepository(Profile) private profileRepository: Repository<Profile>,
     @Inject(forwardRef(() => UsersService)) private usersService: UsersService,
     @Inject(forwardRef(() => RolesService)) private rolesService: RolesService,
-  ) { }
+  ) {}
 
   async create() {
     return this.profileRepository.create();
@@ -44,30 +44,31 @@ export class ProfileService {
     updateProfileDto: UpdateProfileDto,
   ): Promise<ResultData> {
     const { nickname, address, avatar, gender, roleId } = updateProfileDto;
-    const user = await this.usersService.findOne(id)
+    const user = await this.usersService.findOne(id);
     if (!user) {
       return ResultData.error(HttpCodeEnum.NOT_FOUND, '用户不存在');
     }
-    let role = null
+    let role = null;
     if (!isVoid(roleId)) {
-      role = await this.findOne(roleId)
+      role = await this.findOne(roleId);
     }
-    if(!isVoid(nickname)){
-      const profile = await this.findOneByNickname(nickname)
-      if(profile && profile.user.id != id){
+    if (!isVoid(nickname)) {
+      const profile = await this.findOneByNickname(nickname);
+      if (profile && profile.user.id != id) {
         return ResultData.error(HttpCodeEnum.BAD_REQUEST, '昵称已存在');
       }
     }
-    const newProfile = await this.profileRepository.merge(user.profile, {
+    await this.profileRepository.merge(user.profile, {
       nickname,
       address,
       avatar,
-      gender
-    })
+      gender,
+    });
     if (role) {
-      user.role = role
+      user.role = role;
     }
     //保存user
-    const newUser = await this.usersService.save(user)
-    return ResultData.success('更新用户信息成功', newUser)
-  }}
+    const newUser = await this.usersService.save(user);
+    return ResultData.success('更新用户信息成功', newUser);
+  }
+}

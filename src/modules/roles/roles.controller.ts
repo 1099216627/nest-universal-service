@@ -42,7 +42,7 @@ export class RolesController {
   async createUser(@Body() createRoleDto: CreateRoleDto) {
     return await this.rolesService.create(createRoleDto);
   }
-  
+
   @Put(':id')
   @Can(ActionEnum.UPDATE, Role)
   @setRouteNameDecorator('更新角色')
@@ -52,7 +52,7 @@ export class RolesController {
   ) {
     return await this.rolesService.update(id, createRoleDto);
   }
-  
+
   @Delete(':id')
   @Can(ActionEnum.DELETE, Role)
   @setRouteNameDecorator('删除角色')

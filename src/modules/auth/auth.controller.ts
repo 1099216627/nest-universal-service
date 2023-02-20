@@ -5,7 +5,6 @@ import {
   Get,
   Post,
   Req,
-  Res,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
@@ -43,7 +42,7 @@ export class AuthController {
   @UseGuards(JwtGuard)
   @Get('logout')
   @setRouteNameDecorator('登出')
-  async logout(@Res() res): Promise<ResultData> {
-    return this.authService.logout(res);
+  async logout(): Promise<ResultData> {
+    return this.authService.logout();
   }
 }

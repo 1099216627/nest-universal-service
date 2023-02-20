@@ -1,14 +1,4 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Patch,
-  Param,
-  Delete,
-  UseInterceptors,
-  UseGuards,
-} from '@nestjs/common';
+import { Controller, Get, UseInterceptors, UseGuards } from '@nestjs/common';
 import { DashboardService } from './dashboard.service';
 import { LoggerInterceptor } from '../../interceptors/logger.interceptor';
 import { CaslGuard } from '../../guards/casl.guard';

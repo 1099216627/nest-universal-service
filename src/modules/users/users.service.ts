@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { In, Like, Not, Repository } from 'typeorm';
+import { In, Like, Repository } from 'typeorm';
 import { User } from './entities/users.entity';
 import { GetUserDto } from './dto/get-user.dto';
 import {
@@ -27,7 +27,7 @@ export class UsersService {
   ) {}
 
   async findAll(getUsersDto: GetUserDto): Promise<ResultData> {
-    const { page, limit, gender, username = '', roleId ,status} = getUsersDto;
+    const { page, limit, gender, username = '', roleId, status } = getUsersDto;
     const { take, skip } = getPageAndLimit(page, limit);
     //find方法查询
     const [data, total] = await this.userRepository.findAndCount({
@@ -65,7 +65,7 @@ export class UsersService {
     if (findUser) {
       return ResultData.error(HttpCodeEnum.BAD_REQUEST, '用户名已存在');
     }
-    const findProfile = await this.profileService.findOneByNickname(nickname);    
+    const findProfile = await this.profileService.findOneByNickname(nickname);
     if (findProfile) {
       return ResultData.error(HttpCodeEnum.BAD_REQUEST, '昵称已存在');
     }
@@ -92,15 +92,15 @@ export class UsersService {
     return ResultData.success('创建用户成功', result);
   }
 
-  async getList (ids):Promise<ResultData>{
-    const idList = ids.split(',')
+  async getList(ids): Promise<ResultData> {
+    const idList = ids.split(',');
     const data = await this.userRepository.find({
-      where:{
-        id:In(idList)
+      where: {
+        id: In(idList),
       },
       relations: ['role', 'profile', 'role.menus', 'role.permissions'],
-    })
-    return ResultData.success('获取用户列表成功',data)
+    });
+    return ResultData.success('获取用户列表成功', data);
   }
 
   async findOne(id: number): Promise<User> {

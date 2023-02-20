@@ -2,7 +2,6 @@ import {
   Body,
   Controller,
   Param,
-  Post,
   Put,
   UseGuards,
   UseInterceptors,

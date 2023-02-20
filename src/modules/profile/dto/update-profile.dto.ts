@@ -1,6 +1,11 @@
-import { IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
+import {
+  IsEnum,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 import { GenderEnum } from '../../../common/enum/config.enum';
-import { ResultData } from '../../../common/utils';
 
 export class UpdateProfileDto {
   @IsString()
@@ -17,5 +22,5 @@ export class UpdateProfileDto {
   address: string;
   @IsNumber()
   @IsOptional()
-  roleId:number;
+  roleId: number;
 }

@@ -8,7 +8,7 @@ import { RolesModule } from '../roles/roles.module';
 @Module({
   controllers: [ProfileController],
   providers: [ProfileService],
-  imports: [TypeOrmModule.forFeature([Profile]),RolesModule],
+  imports: [TypeOrmModule.forFeature([Profile]), RolesModule],
   exports: [ProfileService],
 })
 export class ProfileModule {}
