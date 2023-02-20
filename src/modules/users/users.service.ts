@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Like, Not, Repository } from 'typeorm';
+import { In, Like, Not, Repository } from 'typeorm';
 import { User } from './entities/users.entity';
 import { GetUserDto } from './dto/get-user.dto';
 import {
@@ -27,7 +27,7 @@ export class UsersService {
   ) {}
 
   async findAll(getUsersDto: GetUserDto): Promise<ResultData> {
-    const { page, limit, gender, username = '', roleId } = getUsersDto;
+    const { page, limit, gender, username = '', roleId ,status} = getUsersDto;
     const { take, skip } = getPageAndLimit(page, limit);
     //find方法查询
     const [data, total] = await this.userRepository.findAndCount({
@@ -35,8 +35,8 @@ export class UsersService {
       skip,
       take,
       where: {
+        status,
         username: Like(`%${username}%`),
-        status: Not(AccountStatusEnum.DELETE),
         profile: {
           gender,
         },
@@ -53,7 +53,10 @@ export class UsersService {
       Number(page),
       Number(limit),
     );
-    return ResultData.success('获取用户列表成功', { ...pagination, data });
+    return ResultData.success('获取用户列表成功', {
+      ...pagination,
+      list: data,
+    });
   }
 
   async create(dto: Partial<CreateUserDto>): Promise<ResultData> {
@@ -61,6 +64,10 @@ export class UsersService {
     const findUser = await this.userRepository.findOne({ where: { username } });
     if (findUser) {
       return ResultData.error(HttpCodeEnum.BAD_REQUEST, '用户名已存在');
+    }
+    const findProfile = await this.profileService.findOneByNickname(nickname);    
+    if (findProfile) {
+      return ResultData.error(HttpCodeEnum.BAD_REQUEST, '昵称已存在');
     }
     const user = await this.userRepository.create({ username, password });
     const salt = await bcrypt.genSalt();
@@ -85,6 +92,17 @@ export class UsersService {
     return ResultData.success('创建用户成功', result);
   }
 
+  async getList (ids):Promise<ResultData>{
+    const idList = ids.split(',')
+    const data = await this.userRepository.find({
+      where:{
+        id:In(idList)
+      },
+      relations: ['role', 'profile', 'role.menus', 'role.permissions'],
+    })
+    return ResultData.success('获取用户列表成功',data)
+  }
+
   async findOne(id: number): Promise<User> {
     return await this.userRepository.findOne({
       where: { id },
@@ -105,33 +123,6 @@ export class UsersService {
     return ResultData.success('批量删除成功');
   }
 
-  async update(id: number, dto: Partial<CreateUserDto>): Promise<ResultData> {
-    const { roleId, username, nickname, gender, avatar } = dto;
-    const user = await this.findOne(id);
-    if (!user) {
-      return ResultData.error(HttpCodeEnum.BAD_REQUEST, '用户不存在');
-    }
-    if (user.username !== username) {
-      const findUser = await this.findOneByUsername(username);
-      if (findUser) {
-        return ResultData.error(HttpCodeEnum.BAD_REQUEST, '用户名已存在');
-      }
-    }
-    user.role = await this.roleService.findOne(roleId);
-    user.username = username;
-    if (nickname) {
-      user.profile.nickname = nickname;
-    }
-    if (gender) {
-      user.profile.gender = gender;
-    }
-    if (avatar) {
-      user.profile.avatar = avatar;
-    }
-    await this.userRepository.save(user);
-    return ResultData.success('更新用户成功', user);
-  }
-
   async disableUser(id: number): Promise<ResultData> {
     const user = await this.findOne(id);
     user.status = AccountStatusEnum.DISABLE;
@@ -146,6 +137,13 @@ export class UsersService {
     return ResultData.success('启用用户成功');
   }
 
+  async recoverUser(id: number): Promise<ResultData> {
+    const user = await this.findOne(id);
+    user.status = AccountStatusEnum.ENABLED;
+    await this.userRepository.save(user);
+    return ResultData.success('恢复用户成功');
+  }
+
   async findOneByUsername(username: string): Promise<User> {
     return await this.userRepository.findOne({
       where: {
@@ -158,5 +156,9 @@ export class UsersService {
   async findUserPermissions(id: number): Promise<Record<string, any>[]> {
     const user = await this.findOne(id);
     return user.role.permissions;
+  }
+
+  async save(user: User): Promise<User> {
+    return await this.userRepository.save(user);
   }
 }

@@ -25,7 +25,7 @@ export class Profile {
   @Column({ type: 'varchar', length: 255, nullable: true })
   avatar: string;
 
-  @Column({ type: 'varchar', length: 20, nullable: true })
+  @Column({ type: 'varchar', length: 20, nullable: true,unique:true })
   nickname: string;
 
   @OneToOne(() => User, {

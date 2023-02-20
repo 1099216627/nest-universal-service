@@ -31,13 +31,19 @@ export class RolesService {
     });
   }
 
+  async find(): Promise<ResultData> {
+    const data = await this.roleRepository.find();
+    return ResultData.success('获取角色列表成功', data);
+  }
+
   async findAll(query: GetRoleDto): Promise<ResultData> {
-    const { page, limit = 10, name = '' } = query;
+    const { page, limit =20, name = '' } = query;
     const { skip, take } = getPageAndLimit(page, limit);
     const [data, total] = await this.roleRepository.findAndCount({
       where: {
         name: Like(`%${name}%`),
       },
+      relations:['users','menus','permissions'],
       skip,
       take,
       order: {
@@ -49,7 +55,7 @@ export class RolesService {
       Number(page),
       Number(limit),
     );
-    return ResultData.success('获取角色列表成功', { data, ...pagination });
+    return ResultData.success('获取角色列表成功', { list:data, ...pagination });
   }
 
   async create(createRoleDto: CreateRoleDto): Promise<ResultData> {

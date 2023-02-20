@@ -25,10 +25,14 @@ export class AllExceptionFilter implements ExceptionFilter {
         ? exception.getStatus()
         : HttpStatus.INTERNAL_SERVER_ERROR;
 
-    let message =
-      exception instanceof HttpException ? exception.message : exception;
-    if (message instanceof Array && message.length) {
-      message = message[0];
+    let message = '';
+    //如果为验证错误
+    if (status === HttpStatus.BAD_REQUEST) {
+      message = exception['response']['message'][0];
+    }
+    //如果为自定义错误
+    if (status === HttpCodeEnum.ERROR) {
+      message = exception['response']['message'];
     }
     if (status === HttpCodeEnum.FORBIDDEN) {
       message = '对不起，您没有权限访问该资源';

@@ -24,7 +24,7 @@ export class Menu extends BaseEntity {
     default: IsBooleanEnum.NO,
     comment: '是否为外链 1是 0否',
   })
-  isLink: number;
+  link: number;
 
   @Column({
     type: 'varchar',
@@ -56,15 +56,13 @@ export class Menu extends BaseEntity {
   })
   affix: number;
 
-  @Column({ type: 'varchar', nullable: true, default: null })
-  component: string;
-
   @Column({
-    type: 'tinyint',
-    default: IsBooleanEnum.NO,
-    comment: '是否为布局 1是 0否',
+    type: 'varchar',
+    nullable: true,
+    default: null,
+    comment: '组件为路径或者LAYOUT',
   })
-  isLayout: number;
+  component: string;
 
   @Column({
     type: 'varchar',

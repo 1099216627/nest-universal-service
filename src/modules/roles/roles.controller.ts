@@ -42,15 +42,7 @@ export class RolesController {
   async createUser(@Body() createRoleDto: CreateRoleDto) {
     return await this.rolesService.create(createRoleDto);
   }
-
-  @Get(':id')
-  @Can(ActionEnum.READ, Role)
-  @setRouteNameDecorator('查询角色')
-  async findOneRole(@Param('id', ParseIntPipe) id: number) {
-    const result = await this.rolesService.findOne(id);
-    return ResultData.success('获取用户信息成功', result);
-  }
-
+  
   @Put(':id')
   @Can(ActionEnum.UPDATE, Role)
   @setRouteNameDecorator('更新角色')
@@ -60,11 +52,26 @@ export class RolesController {
   ) {
     return await this.rolesService.update(id, createRoleDto);
   }
-
+  
   @Delete(':id')
   @Can(ActionEnum.DELETE, Role)
   @setRouteNameDecorator('删除角色')
   async deleteRole(@Param('id', ParseIntPipe) id: number) {
     return await this.rolesService.delete(id);
+  }
+
+  @Get('all')
+  @Can(ActionEnum.READ, Role)
+  @setRouteNameDecorator('查询所有角色')
+  async findAll() {
+    return await this.rolesService.find();
+  }
+
+  @Get(':id')
+  @Can(ActionEnum.READ, Role)
+  @setRouteNameDecorator('查询角色')
+  async findOneRole(@Param('id', ParseIntPipe) id: number) {
+    const result = await this.rolesService.findOne(id);
+    return ResultData.success('获取用户信息成功', result);
   }
 }

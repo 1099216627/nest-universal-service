@@ -11,6 +11,7 @@ import { connectionOptions } from '../ormconfig';
 import { AuthModule } from './modules/auth/auth.module';
 import { MenuModule } from './modules/menu/menu.module';
 import { UploadModule } from './modules/upload/upload.module';
+import { DashboardModule } from './modules/dashboard/dashboard.module';
 const envFilePath = `.env.${process.env.NODE_ENV || 'development'}`; //env区分环境
 
 @Global()
@@ -47,6 +48,7 @@ const envFilePath = `.env.${process.env.NODE_ENV || 'development'}`; //env区分
     UsersModule,
     MenuModule,
     UploadModule,
+    DashboardModule,
   ],
   providers: [Logger],
   exports: [Logger],
