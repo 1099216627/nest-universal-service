@@ -41,9 +41,11 @@ export class RolesService {
     if (!role) {
       return ResultData.error(HttpCodeEnum.BAD_REQUEST, '角色不存在');
     }
-    const findPermissions = await this.menuService.findPermissionByKeys(permissions);
+    const findPermissions = await this.menuService.findPermissionByKeys(
+      permissions,
+    );
     const newRole = await this.roleRepository.merge(role, {
-      permissions:findPermissions,
+      permissions: findPermissions,
     });
     await this.roleRepository.save(newRole);
     return ResultData.success('更新角色权限成功');

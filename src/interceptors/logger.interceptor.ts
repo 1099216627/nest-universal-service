@@ -14,9 +14,9 @@ import * as requestIp from 'request-ip';
 @Injectable()
 export class LoggerInterceptor implements NestInterceptor {
   constructor(private readonly loggerService: LoggerService) {}
-  intercept(context: ExecutionContext, next: CallHandler): Observable<any> {    
+  intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     const name = Reflect.getMetadata('name', context.getHandler());
-    if (!name) {      
+    if (!name) {
       return next.handle();
     }
     const request = context.switchToHttp().getRequest();
@@ -27,7 +27,7 @@ export class LoggerInterceptor implements NestInterceptor {
     const userId = request.user?.id ?? null;
     return next.handle().pipe(
       tap(
-        (next) => {          
+        (next) => {
           const endTime = Date.now();
           const time = endTime - startTime;
           this.loggerService.create({

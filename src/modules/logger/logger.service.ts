@@ -36,15 +36,15 @@ export class LoggerService {
       Number(page),
       Number(limit),
     );
-    return ResultData.success('查询成功', { list:data, ...pagination });
+    return ResultData.success('查询成功', { list: data, ...pagination });
   }
 
-  async deleteAll():Promise<ResultData> {
-   await this.logsRepository.clear();
-   return ResultData.success('删除成功');
+  async deleteAll(): Promise<ResultData> {
+    await this.logsRepository.clear();
+    return ResultData.success('删除成功');
   }
 
-  async deleteByTime(deleteLogDto:DeleteLogDto):Promise<ResultData> {
+  async deleteByTime(deleteLogDto: DeleteLogDto): Promise<ResultData> {
     const { start, end } = deleteLogDto;
     const startTime = new Date(start);
     const endTime = new Date(end);

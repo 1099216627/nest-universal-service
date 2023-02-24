@@ -54,7 +54,6 @@ export class RolesController {
     return await this.rolesService.updatePermission(id, updatePermissionDto);
   }
 
-
   @Put(':id')
   @Can(ActionEnum.UPDATE, Role)
   @setRouteNameDecorator('更新角色')

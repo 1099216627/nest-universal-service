@@ -23,7 +23,7 @@ import { DeleteLogDto } from './dto/delete-log.dto';
 @UseGuards(JwtGuard, CaslGuard)
 @UseInterceptors(LoggerInterceptor)
 export class LoggerController {
-  constructor(private readonly logsService: LoggerService) { }
+  constructor(private readonly logsService: LoggerService) {}
 
   @Get('list')
   @Can(ActionEnum.READ, Logger)
@@ -39,7 +39,7 @@ export class LoggerController {
 
   @Delete('all')
   @Can(ActionEnum.DELETE, Logger)
-  async deleteAllLogs(): Promise<ResultData> {    
+  async deleteAllLogs(): Promise<ResultData> {
     return await this.logsService.deleteAll();
   }
 }
