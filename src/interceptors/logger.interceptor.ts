@@ -14,17 +14,20 @@ import * as requestIp from 'request-ip';
 @Injectable()
 export class LoggerInterceptor implements NestInterceptor {
   constructor(private readonly loggerService: LoggerService) {}
-  intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
+  intercept(context: ExecutionContext, next: CallHandler): Observable<any> {    
+    const name = Reflect.getMetadata('name', context.getHandler());
+    if (!name) {      
+      return next.handle();
+    }
     const request = context.switchToHttp().getRequest();
     const method = request.method;
     const path = request.url;
     const ip = requestIp.getClientIp(request);
     const startTime = Date.now();
     const userId = request.user?.id ?? null;
-    const name = Reflect.getMetadata('name', context.getHandler());
     return next.handle().pipe(
       tap(
-        (next) => {
+        (next) => {          
           const endTime = Date.now();
           const time = endTime - startTime;
           this.loggerService.create({
@@ -33,7 +36,7 @@ export class LoggerInterceptor implements NestInterceptor {
             ip,
             time,
             userId,
-            code: next.code,
+            code: next?.code || next?.status || 200,
             name,
           });
         },
@@ -46,7 +49,7 @@ export class LoggerInterceptor implements NestInterceptor {
             ip,
             time,
             userId,
-            code: error.status,
+            code: error?.status || error?.code,
             name,
           });
         },

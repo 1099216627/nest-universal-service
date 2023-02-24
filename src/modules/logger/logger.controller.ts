@@ -1,5 +1,8 @@
+import { ResultData } from './../../common/utils/index';
 import {
+  Body,
   Controller,
+  Delete,
   Get,
   Query,
   UseGuards,
@@ -14,17 +17,29 @@ import { Logger } from './entities/logger.entity';
 import { GetLogsDto } from './dto/get-logs.dto';
 import { LoggerInterceptor } from '../../interceptors/logger.interceptor';
 import { setRouteNameDecorator } from '../../decorators/set-route-name.decorator';
+import { DeleteLogDto } from './dto/delete-log.dto';
 
-@Controller('logs')
+@Controller('log')
 @UseGuards(JwtGuard, CaslGuard)
-@UseInterceptors(LoggerInterceptor, LoggerInterceptor)
+@UseInterceptors(LoggerInterceptor)
 export class LoggerController {
-  constructor(private readonly logsService: LoggerService) {}
+  constructor(private readonly logsService: LoggerService) { }
 
-  @Get()
+  @Get('list')
   @Can(ActionEnum.READ, Logger)
-  @setRouteNameDecorator('查询日志')
-  async getAllLogs(@Query() query: GetLogsDto) {
+  async getAllLogs(@Query() query: GetLogsDto): Promise<ResultData> {
     return await this.logsService.findAll(query);
+  }
+
+  @Delete()
+  @Can(ActionEnum.DELETE, Logger)
+  async deleteLogs(@Body() deleteLogDto: DeleteLogDto): Promise<ResultData> {
+    return await this.logsService.deleteByTime(deleteLogDto);
+  }
+
+  @Delete('all')
+  @Can(ActionEnum.DELETE, Logger)
+  async deleteAllLogs(): Promise<ResultData> {    
+    return await this.logsService.deleteAll();
   }
 }

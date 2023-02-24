@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Logger } from './entities/logger.entity';
-import { Repository } from 'typeorm';
+import { Between, Repository } from 'typeorm';
 import { CreateLogDto } from './dto/create-log.dto';
 import { UsersService } from '../users/users.service';
 import { GetLogsDto } from './dto/get-logs.dto';
@@ -11,6 +11,7 @@ import {
   isVoid,
   ResultData,
 } from '../../common/utils';
+import { DeleteLogDto } from './dto/delete-log.dto';
 @Injectable()
 export class LoggerService {
   constructor(
@@ -35,7 +36,22 @@ export class LoggerService {
       Number(page),
       Number(limit),
     );
-    return ResultData.success('查询成功', { data, ...pagination });
+    return ResultData.success('查询成功', { list:data, ...pagination });
+  }
+
+  async deleteAll():Promise<ResultData> {
+   await this.logsRepository.clear();
+   return ResultData.success('删除成功');
+  }
+
+  async deleteByTime(deleteLogDto:DeleteLogDto):Promise<ResultData> {
+    const { start, end } = deleteLogDto;
+    const startTime = new Date(start);
+    const endTime = new Date(end);
+    await this.logsRepository.delete({
+      createdAt: Between(startTime, endTime),
+    });
+    return ResultData.success('删除成功');
   }
 
   async create(dto: CreateLogDto) {

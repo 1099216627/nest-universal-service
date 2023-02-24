@@ -22,6 +22,7 @@ import { ActionEnum } from '../../common/enum/action.enum';
 import { Role } from './entities/roles.entity';
 import { LoggerInterceptor } from '../../interceptors/logger.interceptor';
 import { setRouteNameDecorator } from '../../decorators/set-route-name.decorator';
+import { UpdatePermissionDto } from './dto/update-permission.dto';
 
 @Controller('role')
 @UseGuards(JwtGuard, CaslGuard)
@@ -42,6 +43,17 @@ export class RolesController {
   async createUser(@Body() createRoleDto: CreateRoleDto) {
     return await this.rolesService.create(createRoleDto);
   }
+
+  @Put(':id/permission')
+  @Can(ActionEnum.UPDATE, Role)
+  @setRouteNameDecorator('更新角色权限')
+  async updateRolePermission(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() updatePermissionDto: UpdatePermissionDto,
+  ) {
+    return await this.rolesService.updatePermission(id, updatePermissionDto);
+  }
+
 
   @Put(':id')
   @Can(ActionEnum.UPDATE, Role)

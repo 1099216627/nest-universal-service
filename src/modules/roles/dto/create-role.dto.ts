@@ -6,7 +6,7 @@ export class CreateRoleDto {
   @Length(2, 20, { message: '角色名称为2-20个字' })
   name: string;
 
-  @IsNotEmpty({ message: '角色权限不能为空' })
+  @IsNotEmpty({ message: '角色菜单不能为空' })
   @IsArray()
   menus: string[];
 }

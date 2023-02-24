@@ -11,6 +11,7 @@ import {
 import { HttpCodeEnum } from '../../common/enum/http-code.enum';
 import { MenuService } from '../menu/menu.service';
 import { GetRoleDto } from './dto/get-role.dto';
+import { UpdatePermissionDto } from './dto/update-permission.dto';
 
 @Injectable()
 export class RolesService {
@@ -29,6 +30,23 @@ export class RolesService {
       where,
       relations: ['menus', 'permissions'],
     });
+  }
+
+  async updatePermission(
+    id: number,
+    updatePermissionDto: UpdatePermissionDto,
+  ): Promise<ResultData> {
+    const { permissions } = updatePermissionDto;
+    const role = await this.findOne(id);
+    if (!role) {
+      return ResultData.error(HttpCodeEnum.BAD_REQUEST, '角色不存在');
+    }
+    const findPermissions = await this.menuService.findPermissionByKeys(permissions);
+    const newRole = await this.roleRepository.merge(role, {
+      permissions:findPermissions,
+    });
+    await this.roleRepository.save(newRole);
+    return ResultData.success('更新角色权限成功');
   }
 
   async find(): Promise<ResultData> {
@@ -69,10 +87,8 @@ export class RolesService {
     }
     const role = await this.roleRepository.create({ name });
     const menuList = await this.menuService.findMenuByKeys(menus);
-    const permissionList = await this.menuService.findPermissionByKeys(menus);
     const newRole = await this.roleRepository.merge(role, {
       menus: menuList,
-      permissions: permissionList,
     });
     await this.roleRepository.save(newRole);
     return ResultData.success('创建角色成功', newRole);
@@ -85,12 +101,12 @@ export class RolesService {
       return ResultData.error(HttpCodeEnum.BAD_REQUEST, '角色不存在');
     }
     const menuList = await this.menuService.findMenuByKeys(menus);
-    const permissionList = await this.menuService.findPermissionByKeys(menus);
-    role.name = name;
-    role.menus = menuList;
-    role.permissions = permissionList;
-    await this.roleRepository.save(role);
-    return ResultData.success('更新角色成功', role);
+    const newRole = await this.roleRepository.merge(role, {
+      name,
+      menus: menuList,
+    });
+    await this.roleRepository.save(newRole);
+    return ResultData.success('更新角色成功', newRole);
   }
 
   async delete(id: number): Promise<ResultData> {

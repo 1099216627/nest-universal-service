@@ -14,10 +14,13 @@ export class MenuService {
   ) {}
 
   async findAll(): Promise<ResultData> {
-    const result = await this.menuRepository.find({
-      relations: ['permissions'],
-    });
+    const result = await this.menuRepository.find();
     return ResultData.success('获取菜单列表成功', result);
+  }
+
+  async findAllPermission(): Promise<ResultData> {
+    const result = await this.perRepository.find();
+    return ResultData.success('获取权限列表成功', result);
   }
 
   async findUserMenus(req): Promise<ResultData> {
