@@ -8,7 +8,7 @@ export class Permission extends BaseEntity {
   @Column()
   title: string;
 
-  @Column({type:"varchar",comment:"权限"})
+  @Column({ type: 'varchar', comment: '权限' })
   action: string;
 
   @Column({ nullable: false, unique: true })

@@ -16,13 +16,13 @@ import { UpdateProfileDto } from './dto/update-profile.dto';
 import { ResultData } from '../../common/utils';
 import { Can } from 'src/decorators/casl.decorator';
 import { UserAction } from 'src/common/enum/action.enum';
-import { GetUser } from '../../decorators/get-user.decorator'
+import { GetUser } from '../../decorators/get-user.decorator';
 
 @Controller('profile')
 @UseInterceptors(LoggerInterceptor)
 @UseGuards(JwtGuard, CaslGuard)
 export class ProfileController {
-  constructor(private readonly profileService: ProfileService) { }
+  constructor(private readonly profileService: ProfileService) {}
 
   @Put('/:id')
   @setRouteNameDecorator('修改用户信息')

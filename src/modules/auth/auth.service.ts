@@ -15,7 +15,7 @@ export class AuthService {
     private userService: UsersService,
     private jwtService: JwtService,
     @InjectRedis() private readonly redis: Redis,
-  ) { }
+  ) {}
   async signIn(signInDto: SigninUserDto): Promise<ResultData> {
     const { username, password } = signInDto;
     const user = await this.userService.findOneByUsername(username);

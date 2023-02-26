@@ -26,7 +26,7 @@ export class UsersService {
     private readonly profileService: ProfileService,
   ) {}
 
-  async findAll(getUsersDto: GetUserDto,user): Promise<ResultData> {    
+  async findAll(getUsersDto: GetUserDto, user): Promise<ResultData> {
     const { page, limit, gender, username = '', roleId, status } = getUsersDto;
     const { take, skip } = getPageAndLimit(page, limit);
     const id = user.id;

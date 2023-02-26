@@ -18,10 +18,10 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { TasksService } from './schedule/task.schedule';
 const envFilePath = `.env.${process.env.NODE_ENV || 'development'}`; //env区分环境
 const option = {
-  host: "127.0.0.1",
+  host: '127.0.0.1',
   port: 6379,
   db: 0,
-  password:''
+  password: '',
 };
 @Global()
 @Module({
@@ -49,7 +49,7 @@ const option = {
         LOG_ON: Joi.boolean().default(true),
       }),
     }),
-        // Redis集成
+    // Redis集成
     RedisModule.forRootAsync({
       useFactory: (configService: ConfigService, logger: LoggerService) => {
         const host = configService.get(ConfigEnum.REDIS_HOST);
@@ -81,9 +81,9 @@ const option = {
     UsersModule,
     MenuModule,
     UploadModule,
-    ResourcesModule
+    ResourcesModule,
   ],
-  providers: [Logger,TasksService],
+  providers: [Logger, TasksService],
   exports: [Logger],
 })
-export class AppModule { }
+export class AppModule {}

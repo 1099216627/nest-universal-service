@@ -47,8 +47,11 @@ export class UsersController {
   @Get()
   @Can(UserAction.READ, User)
   @setRouteNameDecorator('查询所有用户')
-  async getAllUsers(@Query() getUsersDto: GetUserDto,@GetUser() user): Promise<ResultData> {
-    return await this.userService.findAll(getUsersDto,user);
+  async getAllUsers(
+    @Query() getUsersDto: GetUserDto,
+    @GetUser() user,
+  ): Promise<ResultData> {
+    return await this.userService.findAll(getUsersDto, user);
   }
 
   @Can(UserAction.READ, User)

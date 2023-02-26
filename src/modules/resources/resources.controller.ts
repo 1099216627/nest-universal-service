@@ -1,6 +1,6 @@
 import { Resource } from './entities/resource.entity';
 import { Can } from '../../decorators/casl.decorator';
-import {ResourceAction} from '../../common/enum/action.enum';
+import { ResourceAction } from '../../common/enum/action.enum';
 import { ResultData } from './../../common/utils/index';
 import { LoggerInterceptor } from './../../interceptors/logger.interceptor';
 import { CaslGuard } from './../../guards/casl.guard';

@@ -1,4 +1,9 @@
-import { UserAction, RoleAction, LogAction, ResourceAction } from './../common/enum/action.enum';
+import {
+  UserAction,
+  RoleAction,
+  LogAction,
+  ResourceAction,
+} from './../common/enum/action.enum';
 import { AnyMongoAbility, InferSubjects } from '@casl/ability';
 import { SetMetadata } from '@nestjs/common';
 

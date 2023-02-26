@@ -1,6 +1,6 @@
 import { LoggerService } from './../modules/logger/logger.service';
 import { Injectable, Logger } from '@nestjs/common';
-import { Cron,CronExpression } from '@nestjs/schedule';
+import { Cron, CronExpression } from '@nestjs/schedule';
 
 @Injectable()
 export class TasksService {
@@ -10,7 +10,7 @@ export class TasksService {
   @Cron(CronExpression.EVERY_HOUR)
   async handleCron() {
     console.log('定时任务开始');
-    
+
     await this.loggerService.deleteAll();
   }
 }

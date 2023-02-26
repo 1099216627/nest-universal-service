@@ -45,7 +45,7 @@ export class RolesService {
     const findPermissions = await this.menuService.findPermissionByKeys(
       permissions,
     );
-    role.permissions = findPermissions; 
+    role.permissions = findPermissions;
     await this.roleRepository.save(role);
     return ResultData.success('更新角色权限成功');
   }
@@ -120,32 +120,33 @@ export class RolesService {
     }
     if (role.users.length > 0) {
       //开启事务
-      const queryRunner = this.roleRepository.manager.connection.createQueryRunner();
+      const queryRunner =
+        this.roleRepository.manager.connection.createQueryRunner();
       await queryRunner.connect();
       await queryRunner.startTransaction();
       //角色下用户转移到用户角色
-      const userRole = await this.roleRepository.findOne({where:{
-        identification:"user"
-      }})
-      if(!userRole){
+      const userRole = await this.roleRepository.findOne({
+        where: {
+          identification: 'user',
+        },
+      });
+      if (!userRole) {
         return ResultData.error(HttpCodeEnum.BAD_REQUEST, '用户角色不存在');
-      }      
-      role.users.forEach(async user=>{
+      }
+      role.users.forEach(async (user) => {
         user.role = userRole;
         await queryRunner.manager.save(user);
-      })
+      });
       try {
         await queryRunner.manager.remove(role);
         await queryRunner.commitTransaction();
         return ResultData.success('删除角色成功');
-      }
-      catch (err) {
+      } catch (err) {
         await queryRunner.rollbackTransaction();
-      }
-      finally {
+      } finally {
         await queryRunner.release();
       }
-    }else{
+    } else {
       await this.roleRepository.remove(role);
       return ResultData.success('删除角色成功');
     }
