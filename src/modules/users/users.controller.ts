@@ -22,9 +22,10 @@ import { LoggerInterceptor } from '../../interceptors/logger.interceptor';
 import { BatchDeleteDto } from './dto/batch-delete.dto';
 import { CaslGuard } from '../../guards/casl.guard';
 import { Can } from '../../decorators/casl.decorator';
-import { ActionEnum } from '../../common/enum/action.enum';
+import { UserAction } from '../../common/enum/action.enum';
 import { User } from './entities/users.entity';
 import { setRouteNameDecorator } from '../../decorators/set-route-name.decorator';
+import { GetUser } from 'src/decorators/get-user.decorator';
 
 @Controller('user')
 @UseGuards(JwtGuard, CaslGuard)
@@ -36,21 +37,21 @@ export class UsersController {
   ) {}
 
   @Get('list')
-  @Can(ActionEnum.READ, User)
-  @setRouteNameDecorator('根据id集合查询用户列表')
+  @Can(UserAction.EXPORT, User)
+  @setRouteNameDecorator('导出用户列表')
   async getUserListByIds(@Query('ids') ids): Promise<ResultData> {
     return await this.userService.getList(ids);
   }
 
   //获取所有用户
   @Get()
-  @Can(ActionEnum.READ, User)
+  @Can(UserAction.READ, User)
   @setRouteNameDecorator('查询所有用户')
-  async getAllUsers(@Query() getUsersDto: GetUserDto): Promise<ResultData> {
-    return await this.userService.findAll(getUsersDto);
+  async getAllUsers(@Query() getUsersDto: GetUserDto,@GetUser() user): Promise<ResultData> {
+    return await this.userService.findAll(getUsersDto,user);
   }
 
-  @Can(ActionEnum.READ, User)
+  @Can(UserAction.READ, User)
   @setRouteNameDecorator('查询用户详情')
   @Get(':id')
   async getUserById(
@@ -62,14 +63,14 @@ export class UsersController {
 
   //创建用户
   @Post()
-  @Can(ActionEnum.CREATE, User)
+  @Can(UserAction.CREATE, User)
   @setRouteNameDecorator('创建用户')
   async createUser(@Body() dto: CreateUserDto): Promise<ResultData> {
     return await this.userService.create(dto);
   }
 
   @Delete('batch')
-  @Can(ActionEnum.DELETE, User)
+  @Can(UserAction.DELETE, User)
   @setRouteNameDecorator('批量删除用户')
   async delete(@Body() batchDeleteDto: BatchDeleteDto): Promise<ResultData> {
     return await this.userService.batchDelete(batchDeleteDto);
@@ -77,28 +78,28 @@ export class UsersController {
 
   //删除用户
   @Delete('/:id')
-  @Can(ActionEnum.DELETE, User)
+  @Can(UserAction.DELETE, User)
   @setRouteNameDecorator('删除用户')
   async deleteUser(@Param('id') id: number): Promise<ResultData> {
     return await this.userService.delete(id);
   }
 
   @Put('disable/:id')
-  @Can(ActionEnum.UPDATE, User)
+  @Can(UserAction.STATUS, User)
   @setRouteNameDecorator('禁用用户')
   async disableUser(@Param('id') id: number): Promise<ResultData> {
     return await this.userService.disableUser(id);
   }
 
   @Put('enable/:id')
-  @Can(ActionEnum.UPDATE, User)
+  @Can(UserAction.STATUS, User)
   @setRouteNameDecorator('启用用户')
   async enableUser(@Param('id') id: number): Promise<ResultData> {
     return await this.userService.enableUser(id);
   }
 
   @Put('recover/:id')
-  @Can(ActionEnum.UPDATE, User)
+  @Can(UserAction.STATUS, User)
   @setRouteNameDecorator('恢复用户')
   async recoverUser(@Param('id') id: number): Promise<ResultData> {
     return await this.userService.recoverUser(id);

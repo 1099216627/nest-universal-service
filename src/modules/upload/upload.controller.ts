@@ -36,7 +36,6 @@ export class UploadController {
     }),
   )
   async uploadImage(@UploadedFile() file: any): Promise<ResultData> {
-    console.log(file, '拿到的文件');
     try {
       const url = await this.uploadService.putOssFile(
         `/image/${file.originalname}`,

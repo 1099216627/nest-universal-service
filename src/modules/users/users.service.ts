@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { In, Like, Repository } from 'typeorm';
+import { In, Like, Not, Repository } from 'typeorm';
 import { User } from './entities/users.entity';
 import { GetUserDto } from './dto/get-user.dto';
 import {
@@ -26,15 +26,17 @@ export class UsersService {
     private readonly profileService: ProfileService,
   ) {}
 
-  async findAll(getUsersDto: GetUserDto): Promise<ResultData> {
+  async findAll(getUsersDto: GetUserDto,user): Promise<ResultData> {    
     const { page, limit, gender, username = '', roleId, status } = getUsersDto;
     const { take, skip } = getPageAndLimit(page, limit);
+    const id = user.id;
     //find方法查询
     const [data, total] = await this.userRepository.findAndCount({
       relations: ['role', 'profile'],
       skip,
       take,
       where: {
+        id: Not(id),
         status,
         username: Like(`%${username}%`),
         profile: {

@@ -8,6 +8,11 @@ export enum ConfigEnum {
   DB_TYPE = 'DB_TYPE',
   // JWT
   JWT_SECRET = 'JWT_SECRET',
+  // Redis
+  REDIS_HOST = 'REDIS_HOST',
+  REDIS_PORT = 'REDIS_PORT',
+  REDIS_PASSWORD = 'REDIS_PASSWORD',
+  REDIS_RECONNECT = 'REDIS_RECONNECT',
 }
 export enum LogEnum {
   LOG_LEVEL = 'LOG_LEVEL',

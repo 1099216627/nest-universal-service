@@ -7,13 +7,15 @@ import { ResultData } from '../../common/utils';
 import { HttpCodeEnum } from '../../common/enum/http-code.enum';
 import { User } from '../users/entities/users.entity';
 import { AccountStatusEnum } from '../../common/enum/config.enum';
+import { InjectRedis, Redis } from '@nestjs-modules/ioredis';
 
 @Injectable()
 export class AuthService {
   constructor(
     private userService: UsersService,
     private jwtService: JwtService,
-  ) {}
+    @InjectRedis() private readonly redis: Redis,
+  ) { }
   async signIn(signInDto: SigninUserDto): Promise<ResultData> {
     const { username, password } = signInDto;
     const user = await this.userService.findOneByUsername(username);
@@ -32,6 +34,7 @@ export class AuthService {
     }
     const payload = { username, sub: user.id };
     const access_token = this.jwtService.sign(payload);
+    await this.redis.set(username, access_token);
     return ResultData.success('登录成功', { access_token });
   }
 
@@ -47,7 +50,9 @@ export class AuthService {
     return user;
   }
 
-  async logout(): Promise<ResultData> {
-    return ResultData.success('登出成功');
+  async logout(res): Promise<ResultData> {
+    const user = res.req.user;
+    await this.redis.del(user.username);
+    return ResultData.success('退出成功');
   }
 }

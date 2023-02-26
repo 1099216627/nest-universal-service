@@ -1,6 +1,6 @@
+import { Resource } from './../resources/entities/resource.entity';
 import { Injectable } from '@nestjs/common';
 import { AbilityBuilder, createMongoAbility } from '@casl/ability';
-import { ActionEnum } from '../../common/enum/action.enum';
 import { Logger } from '../logger/entities/logger.entity';
 import { UsersService } from '../users/users.service';
 import { User } from '../users/entities/users.entity';
@@ -18,7 +18,7 @@ export class CaslService {
       const { action, controller } = item;
       const entity = this.getEntity(controller);
       if (entity) {
-        can(action as ActionEnum, entity);
+        can(action, entity);
       }
     });
     return build({
@@ -32,6 +32,7 @@ export class CaslService {
       menu: Menu,
       role: Role,
       log: Logger,
+      resource: Resource,
     };
     if (map[key]) {
       return map[key];

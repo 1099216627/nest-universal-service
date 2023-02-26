@@ -80,3 +80,8 @@ export function isVoid(value: any) {
 export function randomNickname(): string {
   return '用户' + Math.random().toString(36).substring(2, 10);
 }
+
+
+export function is (value,type){
+  return Object.prototype.toString.call(value) === `[object ${type}]`
+}

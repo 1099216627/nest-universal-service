@@ -1,6 +1,6 @@
-import { Global, Logger, Module } from '@nestjs/common';
+import { Global, Logger, LoggerService, Module } from '@nestjs/common';
 import { UsersModule } from './modules/users/users.module';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import * as Joi from 'joi'; //joi是一个用于验证的库
 import * as dotenv from 'dotenv';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -12,8 +12,17 @@ import { AuthModule } from './modules/auth/auth.module';
 import { MenuModule } from './modules/menu/menu.module';
 import { UploadModule } from './modules/upload/upload.module';
 import { ResourcesModule } from './modules/resources/resources.module';
+import { RedisModule } from '@nestjs-modules/ioredis';
+import { ConfigEnum } from './common/enum/config.enum';
+import { ScheduleModule } from '@nestjs/schedule';
+import { TasksService } from './schedule/task.schedule';
 const envFilePath = `.env.${process.env.NODE_ENV || 'development'}`; //env区分环境
-
+const option = {
+  host: "127.0.0.1",
+  port: 6379,
+  db: 0,
+  password:''
+};
 @Global()
 @Module({
   imports: [
@@ -40,6 +49,30 @@ const envFilePath = `.env.${process.env.NODE_ENV || 'development'}`; //env区分
         LOG_ON: Joi.boolean().default(true),
       }),
     }),
+        // Redis集成
+    RedisModule.forRootAsync({
+      useFactory: (configService: ConfigService, logger: LoggerService) => {
+        const host = configService.get(ConfigEnum.REDIS_HOST);
+        const port = configService.get(ConfigEnum.REDIS_PORT);
+        const password = configService.get(ConfigEnum.REDIS_PASSWORD);
+        const url = password
+          ? `redis://${password}@${host}:${port}`
+          : `redis://${host}:${port}`;
+        return {
+          config: {
+            url,
+            reconnectOnError: (err) => {
+              logger.error(`Redis Connection error: ${err}`);
+              return true;
+            },
+          },
+        };
+      },
+      inject: [ConfigService, Logger],
+    }),
+    // 定时任务
+    ScheduleModule.forRoot(),
+
     TypeOrmModule.forRoot(connectionOptions),
     LoggerModule,
     RolesModule,
@@ -48,9 +81,9 @@ const envFilePath = `.env.${process.env.NODE_ENV || 'development'}`; //env区分
     UsersModule,
     MenuModule,
     UploadModule,
-    ResourcesModule,
+    ResourcesModule
   ],
-  providers: [Logger],
+  providers: [Logger,TasksService],
   exports: [Logger],
 })
-export class AppModule {}
+export class AppModule { }

@@ -84,8 +84,4 @@ export class Menu extends BaseEntity {
   })
   @JoinTable()
   roles: Role[];
-
-  @ManyToMany(() => Permission, (permission) => permission.menus)
-  @JoinTable()
-  permissions: Permission[];
 }

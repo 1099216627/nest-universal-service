@@ -12,6 +12,7 @@ import { HttpCodeEnum } from '../../common/enum/http-code.enum';
 import { MenuService } from '../menu/menu.service';
 import { GetRoleDto } from './dto/get-role.dto';
 import { UpdatePermissionDto } from './dto/update-permission.dto';
+import { IsDefaultEnum } from 'src/common/enum/config.enum';
 
 @Injectable()
 export class RolesService {
@@ -28,7 +29,7 @@ export class RolesService {
     }
     return await this.roleRepository.findOne({
       where,
-      relations: ['menus', 'permissions'],
+      relations: ['menus', 'permissions', 'users'],
     });
   }
 
@@ -44,10 +45,8 @@ export class RolesService {
     const findPermissions = await this.menuService.findPermissionByKeys(
       permissions,
     );
-    const newRole = await this.roleRepository.merge(role, {
-      permissions: findPermissions,
-    });
-    await this.roleRepository.save(newRole);
+    role.permissions = findPermissions; 
+    await this.roleRepository.save(role);
     return ResultData.success('更新角色权限成功');
   }
 
@@ -116,7 +115,39 @@ export class RolesService {
     if (!role) {
       return ResultData.error(HttpCodeEnum.BAD_REQUEST, '角色不存在');
     }
-    await this.roleRepository.remove(role);
-    return ResultData.success('删除角色成功');
+    if (role.isDefault === IsDefaultEnum.YES) {
+      return ResultData.error(HttpCodeEnum.BAD_REQUEST, '默认角色不允许删除');
+    }
+    if (role.users.length > 0) {
+      //开启事务
+      const queryRunner = this.roleRepository.manager.connection.createQueryRunner();
+      await queryRunner.connect();
+      await queryRunner.startTransaction();
+      //角色下用户转移到用户角色
+      const userRole = await this.roleRepository.findOne({where:{
+        identification:"user"
+      }})
+      if(!userRole){
+        return ResultData.error(HttpCodeEnum.BAD_REQUEST, '用户角色不存在');
+      }      
+      role.users.forEach(async user=>{
+        user.role = userRole;
+        await queryRunner.manager.save(user);
+      })
+      try {
+        await queryRunner.manager.remove(role);
+        await queryRunner.commitTransaction();
+        return ResultData.success('删除角色成功');
+      }
+      catch (err) {
+        await queryRunner.rollbackTransaction();
+      }
+      finally {
+        await queryRunner.release();
+      }
+    }else{
+      await this.roleRepository.remove(role);
+      return ResultData.success('删除角色成功');
+    }
   }
 }

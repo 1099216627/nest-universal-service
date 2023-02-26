@@ -18,11 +18,11 @@ import { JwtGuard } from '../../guards/jwt.guard';
 import { CaslGuard } from '../../guards/casl.guard';
 import { ResultData } from '../../common/utils';
 import { Can } from '../../decorators/casl.decorator';
-import { ActionEnum } from '../../common/enum/action.enum';
 import { Role } from './entities/roles.entity';
 import { LoggerInterceptor } from '../../interceptors/logger.interceptor';
 import { setRouteNameDecorator } from '../../decorators/set-route-name.decorator';
 import { UpdatePermissionDto } from './dto/update-permission.dto';
+import { RoleAction } from 'src/common/enum/action.enum';
 
 @Controller('role')
 @UseGuards(JwtGuard, CaslGuard)
@@ -31,22 +31,22 @@ export class RolesController {
   constructor(private readonly rolesService: RolesService) {}
 
   @Get()
-  @Can(ActionEnum.READ, Role)
   @setRouteNameDecorator('查询所有角色')
+  @Can(RoleAction.READ, Role)
   async findAllRoles(@Query() query: GetRoleDto) {
     return await this.rolesService.findAll(query);
   }
 
   @Post()
-  @Can(ActionEnum.CREATE, Role)
   @setRouteNameDecorator('创建角色')
+  @Can(RoleAction.CREATE, Role)
   async createUser(@Body() createRoleDto: CreateRoleDto) {
     return await this.rolesService.create(createRoleDto);
   }
 
   @Put(':id/permission')
-  @Can(ActionEnum.UPDATE, Role)
   @setRouteNameDecorator('更新角色权限')
+  @Can(RoleAction.PERMISSION, Role)
   async updateRolePermission(
     @Param('id', ParseIntPipe) id: number,
     @Body() updatePermissionDto: UpdatePermissionDto,
@@ -55,8 +55,8 @@ export class RolesController {
   }
 
   @Put(':id')
-  @Can(ActionEnum.UPDATE, Role)
   @setRouteNameDecorator('更新角色')
+  @Can(RoleAction.UPDATE, Role)
   async updateRole(
     @Param('id', ParseIntPipe) id: number,
     @Body() createRoleDto: CreateRoleDto,
@@ -65,21 +65,19 @@ export class RolesController {
   }
 
   @Delete(':id')
-  @Can(ActionEnum.DELETE, Role)
   @setRouteNameDecorator('删除角色')
+  @Can(RoleAction.DELETE, Role)
   async deleteRole(@Param('id', ParseIntPipe) id: number) {
     return await this.rolesService.delete(id);
   }
 
   @Get('all')
-  @Can(ActionEnum.READ, Role)
   @setRouteNameDecorator('查询所有角色')
   async findAll() {
     return await this.rolesService.find();
   }
 
   @Get(':id')
-  @Can(ActionEnum.READ, Role)
   @setRouteNameDecorator('查询角色')
   async findOneRole(@Param('id', ParseIntPipe) id: number) {
     const result = await this.rolesService.findOne(id);

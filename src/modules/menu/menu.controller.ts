@@ -10,7 +10,6 @@ import { JwtGuard } from '../../guards/jwt.guard';
 import { LoggerInterceptor } from '../../interceptors/logger.interceptor';
 import { CaslGuard } from '../../guards/casl.guard';
 import { Can } from '../../decorators/casl.decorator';
-import { ActionEnum } from '../../common/enum/action.enum';
 import { Menu } from './entities/menu.entity';
 import { setRouteNameDecorator } from '../../decorators/set-route-name.decorator';
 
@@ -21,7 +20,6 @@ export class MenuController {
   constructor(private readonly menuService: MenuService) {}
 
   @Get()
-  @Can(ActionEnum.READ, Menu)
   @setRouteNameDecorator('查询所有菜单')
   async getMenus() {
     return await this.menuService.findAll();

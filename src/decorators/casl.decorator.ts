@@ -1,6 +1,6 @@
+import { UserAction, RoleAction, LogAction, ResourceAction } from './../common/enum/action.enum';
 import { AnyMongoAbility, InferSubjects } from '@casl/ability';
 import { SetMetadata } from '@nestjs/common';
-import { ActionEnum } from '../common/enum/action.enum';
 
 export enum CHECK_POLICIES_KEY {
   HANDLER = 'CHECK_POLICIES_HANDLER',
@@ -30,7 +30,7 @@ export const CheckPolicies = (...handlers: policyHandlerCallback[]) =>
  * @Can(ActionEnum.DELETE, Log, 'id')
  */
 export const Can = (
-  action: ActionEnum,
+  action: UserAction | RoleAction | LogAction | ResourceAction,
   subject: InferSubjects<any>,
   conditions?: any,
 ) =>
@@ -48,7 +48,7 @@ export const Can = (
  * @Cannot(ActionEnum.READ, 'Post')
  */
 export const Cannot = (
-  action: ActionEnum,
+  action: UserAction | RoleAction | LogAction | ResourceAction,
   subject: InferSubjects<any>,
   conditions?: any,
 ) =>
