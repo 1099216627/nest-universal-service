@@ -6,3 +6,6 @@ tmp/
 temp/
 dist/
 logs/
+uploads/
+.env.development
+.env.production

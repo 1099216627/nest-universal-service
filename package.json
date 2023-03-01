@@ -7,7 +7,7 @@
   "license": "MIT",
   "scripts": {
     "prepare": "husky install",
-    "build": "nest build",
+    "build": "cross-env NODE_ENV=production nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
     "start:dev": "cross-env NODE_ENV=development nest start --watch",
@@ -42,6 +42,8 @@
     "bcrypt": "^5.1.0",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.0",
+    "express-rate-limit": "^6.7.0",
+    "helmet": "^6.0.1",
     "ioredis": "^5.3.1",
     "joi": "^17.7.0",
     "jsonwebtoken": "^9.0.0",
