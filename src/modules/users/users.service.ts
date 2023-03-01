@@ -67,7 +67,7 @@ export class UsersService {
     if (findUser) {
       return ResultData.error(HttpCodeEnum.BAD_REQUEST, '用户名已存在');
     }
-    if(!isVoid(nickname)){
+    if (!isVoid(nickname)) {
       const findProfile = await this.profileService.findOneByNickname(nickname);
       if (findProfile) {
         return ResultData.error(HttpCodeEnum.BAD_REQUEST, '昵称已存在');

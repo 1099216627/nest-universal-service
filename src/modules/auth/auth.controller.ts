@@ -46,8 +46,11 @@ export class AuthController {
   @UseGuards(JwtGuard)
   @Put('password')
   @setRouteNameDecorator('修改密码')
-  async updatePassword(@Body() changePasswordDto:ChangePasswordDto,@GetUser() user): Promise<ResultData> {    
-    return this.authService.updatePassword(changePasswordDto,user);
+  async updatePassword(
+    @Body() changePasswordDto: ChangePasswordDto,
+    @GetUser() user,
+  ): Promise<ResultData> {
+    return this.authService.updatePassword(changePasswordDto, user);
   }
 
   @UseGuards(JwtGuard)

@@ -51,22 +51,30 @@ export class AuthService {
     return user;
   }
 
-  async updatePassword(changePasswordDto:ChangePasswordDto,user):Promise<ResultData>{
-    const id = user.id;    
+  async updatePassword(
+    changePasswordDto: ChangePasswordDto,
+    user,
+  ): Promise<ResultData> {
+    const id = user.id;
     const findUser = await this.userService.findOne(id);
-    const isMatch = await bcrypt.compare(changePasswordDto.oldPassword, findUser.password);
+    const isMatch = await bcrypt.compare(
+      changePasswordDto.oldPassword,
+      findUser.password,
+    );
     if (!isMatch) {
       return ResultData.error(HttpCodeEnum.UNAUTHORIZED, '旧密码错误');
     }
     if (changePasswordDto.newPassword === changePasswordDto.oldPassword) {
-      return ResultData.error(HttpCodeEnum.UNAUTHORIZED, '新密码不能与旧密码相同');
+      return ResultData.error(
+        HttpCodeEnum.UNAUTHORIZED,
+        '新密码不能与旧密码相同',
+      );
     }
     const salt = await bcrypt.genSalt();
     const password = await bcrypt.hash(changePasswordDto.newPassword, salt);
     findUser.password = password;
     await this.userService.save(findUser);
-    return  ResultData.success('修改成功');
-    
+    return ResultData.success('修改成功');
   }
 
   async logout(res): Promise<ResultData> {
