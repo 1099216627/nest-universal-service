@@ -1,4 +1,3 @@
-import { Resource } from './../../modules/resources/entities/resource.entity';
 export enum UserAction {
   CREATE = 'create',
   READ = 'read',

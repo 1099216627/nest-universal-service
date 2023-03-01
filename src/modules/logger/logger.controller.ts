@@ -15,7 +15,6 @@ import { JwtGuard } from '../../guards/jwt.guard';
 import { Logger } from './entities/logger.entity';
 import { GetLogsDto } from './dto/get-logs.dto';
 import { LoggerInterceptor } from '../../interceptors/logger.interceptor';
-import { setRouteNameDecorator } from '../../decorators/set-route-name.decorator';
 import { DeleteLogDto } from './dto/delete-log.dto';
 import { LogAction } from 'src/common/enum/action.enum';
 

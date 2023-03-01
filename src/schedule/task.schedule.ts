@@ -1,5 +1,5 @@
 import { LoggerService } from './../modules/logger/logger.service';
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 
 @Injectable()

@@ -17,12 +17,6 @@ import { ConfigEnum } from './common/enum/config.enum';
 import { ScheduleModule } from '@nestjs/schedule';
 import { TasksService } from './schedule/task.schedule';
 const envFilePath = `.env.${process.env.NODE_ENV || 'development'}`; //env区分环境
-const option = {
-  host: '127.0.0.1',
-  port: 6379,
-  db: 0,
-  password: '',
-};
 @Global()
 @Module({
   imports: [

@@ -9,8 +9,6 @@ import { MenuService } from './menu.service';
 import { JwtGuard } from '../../guards/jwt.guard';
 import { LoggerInterceptor } from '../../interceptors/logger.interceptor';
 import { CaslGuard } from '../../guards/casl.guard';
-import { Can } from '../../decorators/casl.decorator';
-import { Menu } from './entities/menu.entity';
 import { setRouteNameDecorator } from '../../decorators/set-route-name.decorator';
 
 @Controller('menu')

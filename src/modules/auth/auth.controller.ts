@@ -1,9 +1,11 @@
+import { ChangePasswordDto } from './dto/change-password.dto';
 import {
   Body,
   ClassSerializerInterceptor,
   Controller,
   Get,
   Post,
+  Put,
   Req,
   Res,
   UseGuards,
@@ -15,6 +17,7 @@ import { JwtGuard } from '../../guards/jwt.guard';
 import { ResultData } from '../../common/utils';
 import { LoggerInterceptor } from '../../interceptors/logger.interceptor';
 import { setRouteNameDecorator } from '../../decorators/set-route-name.decorator';
+import { GetUser } from 'src/decorators/get-user.decorator';
 
 @Controller('auth')
 @UseInterceptors(ClassSerializerInterceptor, LoggerInterceptor)
@@ -38,6 +41,13 @@ export class AuthController {
   @setRouteNameDecorator('获取用户信息')
   async userInfo(@Req() req): Promise<ResultData> {
     return ResultData.success('获取用户信息成功', req.user);
+  }
+
+  @UseGuards(JwtGuard)
+  @Put('password')
+  @setRouteNameDecorator('修改密码')
+  async updatePassword(@Body() changePasswordDto:ChangePasswordDto,@GetUser() user): Promise<ResultData> {    
+    return this.authService.updatePassword(changePasswordDto,user);
   }
 
   @UseGuards(JwtGuard)

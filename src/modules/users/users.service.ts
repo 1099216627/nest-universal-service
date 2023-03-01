@@ -67,9 +67,11 @@ export class UsersService {
     if (findUser) {
       return ResultData.error(HttpCodeEnum.BAD_REQUEST, '用户名已存在');
     }
-    const findProfile = await this.profileService.findOneByNickname(nickname);
-    if (findProfile) {
-      return ResultData.error(HttpCodeEnum.BAD_REQUEST, '昵称已存在');
+    if(!isVoid(nickname)){
+      const findProfile = await this.profileService.findOneByNickname(nickname);
+      if (findProfile) {
+        return ResultData.error(HttpCodeEnum.BAD_REQUEST, '昵称已存在');
+      }
     }
     const user = await this.userRepository.create({ username, password });
     const salt = await bcrypt.genSalt();
@@ -109,6 +111,12 @@ export class UsersService {
     return await this.userRepository.findOne({
       where: { id },
       relations: ['role', 'profile', 'role.menus', 'role.permissions'],
+    });
+  }
+
+  async findUserPassword(id: number): Promise<User> {
+    return await this.userRepository.findOne({
+      where: { id },
     });
   }
 

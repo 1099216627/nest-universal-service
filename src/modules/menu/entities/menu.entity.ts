@@ -2,7 +2,6 @@ import { Column, Entity, JoinTable, ManyToMany } from 'typeorm';
 import { BaseEntity } from '../../../common/entities/base.entity';
 import { Role } from '../../roles/entities/roles.entity';
 import { IsBooleanEnum } from '../../../common/enum/config.enum';
-import { Permission } from './permission.entity';
 
 @Entity('menu')
 export class Menu extends BaseEntity {

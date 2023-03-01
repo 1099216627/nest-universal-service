@@ -1,6 +1,5 @@
 import { Column, Entity, JoinTable, ManyToMany } from 'typeorm';
 import { BaseEntity } from '../../../common/entities/base.entity';
-import { Menu } from './menu.entity';
 import { Role } from '../../roles/entities/roles.entity';
 
 @Entity()
