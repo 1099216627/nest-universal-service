@@ -31,7 +31,7 @@ export class RolesController {
   constructor(private readonly rolesService: RolesService) {}
 
   @Get()
-  @setRouteNameDecorator('查询所有角色')
+  @setRouteNameDecorator('查询角色列表')
   @Can(RoleAction.READ, Role)
   async findAllRoles(@Query() query: GetRoleDto) {
     return await this.rolesService.findAll(query);
@@ -44,7 +44,7 @@ export class RolesController {
     return await this.rolesService.create(createRoleDto);
   }
 
-  @Put(':id/permission')
+  @Put('permission/:id')
   @setRouteNameDecorator('更新角色权限')
   @Can(RoleAction.PERMISSION, Role)
   async updateRolePermission(
@@ -55,7 +55,7 @@ export class RolesController {
   }
 
   @Put(':id')
-  @setRouteNameDecorator('更新角色')
+  @setRouteNameDecorator('编辑角色')
   @Can(RoleAction.UPDATE, Role)
   async updateRole(
     @Param('id', ParseIntPipe) id: number,
@@ -82,5 +82,19 @@ export class RolesController {
   async findOneRole(@Param('id', ParseIntPipe) id: number) {
     const result = await this.rolesService.findOne(id);
     return ResultData.success('获取用户信息成功', result);
+  }
+
+  @Put('lock/:id')
+  @setRouteNameDecorator('锁定角色')
+  @Can(RoleAction.LOCK, Role)
+  async lockRole(@Param('id', ParseIntPipe) id: number) {
+    return await this.rolesService.lock(id);
+  }
+
+  @Put('unlock/:id')
+  @setRouteNameDecorator('解锁角色')
+  @Can(RoleAction.UNLOCK, Role)
+  async unlockRole(@Param('id', ParseIntPipe) id: number) {
+    return await this.rolesService.unlock(id);
   }
 }

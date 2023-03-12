@@ -14,7 +14,7 @@ import { HttpCodeEnum } from '../../common/enum/http-code.enum';
 import { LoggerInterceptor } from '../../interceptors/logger.interceptor';
 import { JwtGuard } from '../../guards/jwt.guard';
 import { setRouteNameDecorator } from '../../decorators/set-route-name.decorator';
-
+import * as fs from 'fs';
 @Controller('upload')
 @UseGuards(JwtGuard)
 @UseInterceptors(LoggerInterceptor)
@@ -27,6 +27,14 @@ export class UploadController {
     FileInterceptor('file', {
       storage: multer.diskStorage({
         destination: (req, file, cb) => {
+          //新建uploads文件夹
+          if (!fs.existsSync(process.cwd() + '/uploads')) {
+            fs.mkdirSync(process.cwd() + '/uploads');
+          }
+          //新建images文件夹
+          if (!fs.existsSync(process.cwd() + '/uploads' + '/images')) {
+            fs.mkdirSync(process.cwd() + '/uploads' + '/images');
+          }
           cb(null, process.cwd() + '/uploads' + '/images');
         },
         filename: (req, file, cb) => {
@@ -37,6 +45,7 @@ export class UploadController {
   )
   async uploadImage(@UploadedFile() file: any): Promise<ResultData> {
     try {
+      //上传到oss
       const url = await this.uploadService.putOssFile(
         `/image/${file.originalname}`,
         process.cwd() + '/uploads' + '/images/' + file.originalname,

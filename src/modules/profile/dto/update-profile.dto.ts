@@ -22,5 +22,7 @@ export class UpdateProfileDto {
   address: string;
   @IsNumber()
   @IsOptional()
-  roleId: number;
+  email: string;
+  @IsOptional()
+  phone: string;
 }

@@ -58,9 +58,11 @@ export function generatePaginationData(
 }
 
 export function formatDate(date: Date | string) {
+  if (!date) return '';
   if (typeof date === 'string') {
     date = new Date(date);
   }
+
   //时间格式化YYYY-MM-DD HH:mm:ss
   const year = date.getFullYear();
   const month = date.getMonth() + 1;
@@ -83,4 +85,12 @@ export function randomNickname(): string {
 
 export function is(value, type) {
   return Object.prototype.toString.call(value) === `[object ${type}]`;
+}
+
+export function generateUUID(): string {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+    const r = (Math.random() * 16) | 0;
+    const v = c === 'x' ? r : (r & 0x3) | 0x8;
+    return v.toString(16);
+  });
 }

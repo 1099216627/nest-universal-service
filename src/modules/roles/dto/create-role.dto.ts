@@ -8,5 +8,5 @@ export class CreateRoleDto {
 
   @IsNotEmpty({ message: '角色菜单不能为空' })
   @IsArray()
-  menus: string[];
+  menus: number[];
 }

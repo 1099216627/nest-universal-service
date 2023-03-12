@@ -43,14 +43,11 @@ export class ProfileService {
     id: number,
     updateProfileDto: UpdateProfileDto,
   ): Promise<ResultData> {
-    const { nickname, address, avatar, gender, roleId } = updateProfileDto;
+    const { nickname, address, avatar, gender, phone, email } =
+      updateProfileDto;
     const user = await this.usersService.findOne(id);
     if (!user) {
       return ResultData.error(HttpCodeEnum.NOT_FOUND, '用户不存在');
-    }
-    let role = null;
-    if (!isVoid(roleId)) {
-      role = await this.findOne(roleId);
     }
     if (!isVoid(nickname)) {
       const profile = await this.findOneByNickname(nickname);
@@ -63,10 +60,9 @@ export class ProfileService {
       address,
       avatar,
       gender,
+      email,
+      phone,
     });
-    if (role) {
-      user.role = role;
-    }
     //保存user
     const newUser = await this.usersService.save(user);
     return ResultData.success('更新用户信息成功', newUser);

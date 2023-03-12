@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Logger } from './entities/logger.entity';
-import { Between, Repository } from 'typeorm';
+import { Between, Like, Repository } from 'typeorm';
 import { CreateLogDto } from './dto/create-log.dto';
 import { UsersService } from '../users/users.service';
 import { GetLogsDto } from './dto/get-logs.dto';
@@ -21,11 +21,15 @@ export class LoggerService {
   ) {}
 
   async findAll(query: GetLogsDto): Promise<ResultData> {
-    const { page, limit } = query;
+    const { page, limit, name = '', method } = query;
     const { skip, take } = getPageAndLimit(page, limit);
     const [data, total] = await this.logsRepository.findAndCount({
       skip,
       take,
+      where: {
+        name: Like(`%${name}%`),
+        method: isVoid(method) ? undefined : method,
+      },
       relations: ['user'],
       order: {
         createdAt: 'DESC',

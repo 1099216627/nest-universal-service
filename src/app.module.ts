@@ -16,6 +16,7 @@ import { RedisModule } from '@nestjs-modules/ioredis';
 import { ConfigEnum } from './common/enum/config.enum';
 import { ScheduleModule } from '@nestjs/schedule';
 import { TasksService } from './schedule/task.schedule';
+import { AxiosModule } from './common/lib/axios/axios.module';
 const envFilePath = `.env.${process.env.NODE_ENV || 'development'}`; //env区分环境
 @Global()
 @Module({
@@ -76,6 +77,7 @@ const envFilePath = `.env.${process.env.NODE_ENV || 'development'}`; //env区分
     MenuModule,
     UploadModule,
     ResourcesModule,
+    AxiosModule,
   ],
   providers: [Logger, TasksService],
   exports: [Logger],

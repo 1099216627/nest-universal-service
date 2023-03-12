@@ -12,7 +12,7 @@ import { HttpCodeEnum } from '../../common/enum/http-code.enum';
 import { MenuService } from '../menu/menu.service';
 import { GetRoleDto } from './dto/get-role.dto';
 import { UpdatePermissionDto } from './dto/update-permission.dto';
-import { IsDefaultEnum } from 'src/common/enum/config.enum';
+import { IsDefaultEnum, StatusEnum } from '../../common/enum/config.enum';
 
 @Injectable()
 export class RolesService {
@@ -42,12 +42,26 @@ export class RolesService {
     if (!role) {
       return ResultData.error(HttpCodeEnum.BAD_REQUEST, '角色不存在');
     }
-    const findPermissions = await this.menuService.findPermissionByKeys(
+    if (role.isDefault === IsDefaultEnum.YES) {
+      return ResultData.error(
+        HttpCodeEnum.BAD_REQUEST,
+        '默认角色不允许修改权限',
+      );
+    }
+    if (role.status === StatusEnum.LOCK) {
+      return ResultData.error(
+        HttpCodeEnum.BAD_REQUEST,
+        '锁定角色不允许修改权限',
+      );
+    }
+    const findPermissions = await this.menuService.findPermissionByIds(
       permissions,
     );
+    console.log(findPermissions, permissions);
+
     role.permissions = findPermissions;
     await this.roleRepository.save(role);
-    return ResultData.success('更新角色权限成功');
+    return ResultData.success('更新角色权限成功', role);
   }
 
   async find(): Promise<ResultData> {
@@ -101,13 +115,17 @@ export class RolesService {
     if (!role) {
       return ResultData.error(HttpCodeEnum.BAD_REQUEST, '角色不存在');
     }
+    if (role.isDefault === IsDefaultEnum.YES) {
+      return ResultData.error(HttpCodeEnum.BAD_REQUEST, '默认角色不允许修改');
+    }
+    if (role.status === StatusEnum.LOCK) {
+      return ResultData.error(HttpCodeEnum.BAD_REQUEST, '锁定角色不允许修改');
+    }
     const menuList = await this.menuService.findMenuByKeys(menus);
-    const newRole = await this.roleRepository.merge(role, {
-      name,
-      menus: menuList,
-    });
-    await this.roleRepository.save(newRole);
-    return ResultData.success('更新角色成功', newRole);
+    role.name = name;
+    role.menus = menuList;
+    await this.roleRepository.save(role);
+    return ResultData.success('更新角色成功', role);
   }
 
   async delete(id: number): Promise<ResultData> {
@@ -150,5 +168,31 @@ export class RolesService {
       await this.roleRepository.remove(role);
       return ResultData.success('删除角色成功');
     }
+  }
+
+  async lock(id: number): Promise<ResultData> {
+    const role = await this.findOne(id);
+    if (!role) {
+      return ResultData.error(HttpCodeEnum.BAD_REQUEST, '角色不存在');
+    }
+    if (role.isDefault === IsDefaultEnum.YES) {
+      return ResultData.error(HttpCodeEnum.BAD_REQUEST, '默认角色不允许锁定');
+    }
+    role.status = StatusEnum.LOCK;
+    await this.roleRepository.save(role);
+    return ResultData.success('锁定角色成功', role);
+  }
+
+  async unlock(id: number): Promise<ResultData> {
+    const role = await this.findOne(id);
+    if (!role) {
+      return ResultData.error(HttpCodeEnum.BAD_REQUEST, '角色不存在');
+    }
+    if (role.isDefault === IsDefaultEnum.YES) {
+      return ResultData.error(HttpCodeEnum.BAD_REQUEST, '默认角色不允许解锁');
+    }
+    role.status = StatusEnum.ENABLED;
+    await this.roleRepository.save(role);
+    return ResultData.success('解锁角色成功', role);
   }
 }

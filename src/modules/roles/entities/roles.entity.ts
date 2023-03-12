@@ -23,7 +23,7 @@ export class Role extends BaseEntity {
     type: 'enum',
     enum: StatusEnum,
     default: StatusEnum.ENABLED,
-    comment: '状态 启用1 禁用2 删除3',
+    comment: '状态 正常1 锁定0',
   })
   status: StatusEnum;
 

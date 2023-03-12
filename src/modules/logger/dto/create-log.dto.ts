@@ -27,4 +27,7 @@ export class CreateLogDto {
   @IsNumber()
   @IsNotEmpty()
   code: number;
+
+  @IsNotEmpty()
+  area: string;
 }

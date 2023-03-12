@@ -15,6 +15,9 @@ export class Logger extends BaseEntity {
   @Column()
   ip: string;
 
+  @Column({ nullable: true })
+  area: string;
+
   @Column({ comment: '耗时时间', type: 'int' })
   time: number;
 

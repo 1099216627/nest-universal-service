@@ -6,4 +6,10 @@ export class GetLogsDto {
 
   @IsOptional()
   limit?: number;
+
+  @IsOptional()
+  name?: string;
+
+  @IsOptional()
+  method?: string;
 }

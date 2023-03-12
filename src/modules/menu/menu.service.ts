@@ -42,18 +42,18 @@ export class MenuService {
     return ResultData.success('获取用户菜单成功', { permissions, menus });
   }
 
-  async findMenuByKeys(keys: string[]): Promise<Menu[]> {
+  async findMenuByKeys(ids: number[]): Promise<Menu[]> {
     return await this.menuRepository.find({
       where: {
-        key: In(keys),
+        id: In(ids),
       },
     });
   }
 
-  async findPermissionByKeys(keys: string[]): Promise<Permission[]> {
+  async findPermissionByIds(ids: number[]): Promise<Permission[]> {
     return await this.perRepository.find({
       where: {
-        key: In(keys),
+        id: In(ids),
       },
     });
   }

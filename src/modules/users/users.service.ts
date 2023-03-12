@@ -17,6 +17,7 @@ import { ProfileService } from '../profile/profile.service';
 import { HttpCodeEnum } from '../../common/enum/http-code.enum';
 import { AccountStatusEnum } from '../../common/enum/config.enum';
 import { BatchDeleteDto } from './dto/batch-delete.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
 
 @Injectable()
 export class UsersService {
@@ -27,29 +28,32 @@ export class UsersService {
   ) {}
 
   async findAll(getUsersDto: GetUserDto, user): Promise<ResultData> {
-    const { page, limit, gender, username = '', roleId, status } = getUsersDto;
+    const { page, limit, gender, name = '', roleId, status } = getUsersDto;
     const { take, skip } = getPageAndLimit(page, limit);
     const id = user.id;
-    //find方法查询
-    const [data, total] = await this.userRepository.findAndCount({
-      relations: ['role', 'profile'],
-      skip,
-      take,
-      where: {
-        id: Not(id),
-        status,
-        username: Like(`%${username}%`),
-        profile: {
-          gender,
-        },
-        role: {
-          id: roleId,
-        },
-      },
-      order: {
-        createdAt: 'DESC',
-      },
-    });
+    const builder = this.userRepository
+      .createQueryBuilder('user')
+      .leftJoinAndSelect('user.role', 'role')
+      .leftJoinAndSelect('user.profile', 'profile')
+      .where('user.id != :id', { id });
+    if (!isVoid(status)) {
+      builder.andWhere('user.status = :status', { status });
+    }
+    if (!isVoid(name)) {
+      builder.andWhere(
+        'user.username like :name or profile.nickname like :name',
+        { name: `%${name}%` },
+      );
+    }
+    if (!isVoid(roleId)) {
+      builder.andWhere('role.id = :roleId', { roleId });
+    }
+    if (!isVoid(gender)) {
+      builder.andWhere('profile.gender = :gender', { gender });
+    }
+    builder.orderBy('user.createdAt', 'DESC');
+    const [data, total] = await builder.take(take).skip(skip).getManyAndCount();
+
     const pagination = generatePaginationData(
       total,
       Number(page),
@@ -96,15 +100,31 @@ export class UsersService {
     return ResultData.success('创建用户成功', result);
   }
 
-  async getList(ids): Promise<ResultData> {
-    const idList = ids.split(',');
-    const data = await this.userRepository.find({
+  async update(id: number, updateUserDto: UpdateUserDto): Promise<ResultData> {
+    const { gender, avatar, roleId, nickname } = updateUserDto;
+    const findUser = await this.findOne(id);
+    if (!findUser) {
+      return ResultData.error(HttpCodeEnum.NOT_FOUND, '编辑用户不存在');
+    }
+    const findRole = await this.roleService.findOne(roleId);
+    if (!findRole) {
+      return ResultData.error(HttpCodeEnum.NOT_FOUND, '所选角色不存在');
+    }
+    findUser.profile.gender = gender;
+    findUser.profile.avatar = avatar;
+    findUser.profile.nickname = nickname;
+    findUser.role = findRole;
+    await this.userRepository.save(findUser);
+    return ResultData.success('编辑用户成功', findUser);
+  }
+
+  async getList(ids: number[]): Promise<User[]> {
+    return await this.userRepository.find({
       where: {
-        id: In(idList),
+        id: In(ids),
       },
       relations: ['role', 'profile', 'role.menus', 'role.permissions'],
     });
-    return ResultData.success('获取用户列表成功', data);
   }
 
   async findOne(id: number): Promise<User> {
@@ -170,5 +190,10 @@ export class UsersService {
 
   async save(user: User): Promise<User> {
     return await this.userRepository.save(user);
+  }
+
+  async updater(id: number, params: Partial<User>) {
+    //在这里编辑用户信息
+    return await this.userRepository.update(id, params);
   }
 }

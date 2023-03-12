@@ -1,4 +1,4 @@
-import { Global, Module } from '@nestjs/common';
+import { Global, Module, forwardRef } from '@nestjs/common';
 import { LoggerService } from './logger.service';
 import { LoggerController } from './logger.controller';
 import { utilities, WinstonModule, WinstonModuleOptions } from 'nest-winston';
@@ -9,6 +9,7 @@ import * as DailyRotateFile from 'winston-daily-rotate-file';
 import { LogEnum } from '../../common/enum/config.enum';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Logger } from './entities/logger.entity';
+import { HttpModule } from '@nestjs/axios';
 
 type Level = 'error' | 'warn' | 'info' | 'debug';
 function createDailyRotateFileTransport(level: Level, filename: string) {

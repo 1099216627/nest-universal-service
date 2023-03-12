@@ -6,7 +6,7 @@ export class GetUserDto {
   @IsOptional()
   limit?: number;
   @IsOptional()
-  username?: string;
+  name?: string;
   @IsOptional()
   roleId?: number;
   @IsOptional()

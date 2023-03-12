@@ -28,6 +28,9 @@ export class Profile {
   @Column({ type: 'varchar', length: 20, nullable: true, unique: true })
   nickname: string;
 
+  @Column({ type: 'varchar', length: 255, nullable: true })
+  email: string;
+
   @OneToOne(() => User, {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',

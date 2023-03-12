@@ -13,6 +13,8 @@ export enum RoleAction {
   UPDATE = 'update',
   DELETE = 'delete',
   PERMISSION = 'permission',
+  LOCK = 'lock',
+  UNLOCK = 'unlock',
 }
 
 export enum LogAction {

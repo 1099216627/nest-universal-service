@@ -8,7 +8,6 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ConfigEnum } from '../../common/enum/config.enum';
 import { JwtStrategy } from './jwt.strategy';
 import { CaslService } from './casl.service';
-
 @Global()
 @Module({
   providers: [AuthService, JwtStrategy, CaslService],

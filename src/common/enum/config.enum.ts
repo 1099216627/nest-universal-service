@@ -26,13 +26,12 @@ export enum GenderEnum {
 
 export enum StatusEnum {
   ENABLED = 1,
-  DISABLE = 2,
-  DELETE = 3,
+  LOCK = 0,
 }
 
 export enum IsDefaultEnum {
   YES = 1,
-  NO = 2,
+  NO = 0,
 }
 
 export enum IsBooleanEnum {

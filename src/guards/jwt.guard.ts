@@ -19,26 +19,32 @@ export class JwtGuard extends AuthGuard('jwt') {
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
-    const token = ExtractJwt.fromAuthHeaderAsBearerToken()(request);
+    const token = request.signedCookies['access_token'];
     if (!token) {
       throw new UnauthorizedException();
     }
-    const payload = await verify(
-      token,
-      this.configService.get(ConfigEnum.JWT_SECRET),
-    );
-    const username = payload['username'];
-    const id = payload['sub'];
-    const user = await this.usersService.findOne(id);
-    if (!user || user.status !== AccountStatusEnum.ENABLED) {
+    try {
+      const payload = await verify(
+        token,
+        this.configService.get(ConfigEnum.JWT_SECRET),
+      );
+
+      const username = payload['username'];
+      const id = payload['sub'];
+      const user = await this.usersService.findOne(id);
+      if (!user || user.status !== AccountStatusEnum.ENABLED) {
+        throw new UnauthorizedException();
+      }
+      const tokenCache = username ? await this.redis.get(username) : null;
+      if (!payload || !username || tokenCache !== token) {
+        username && (await this.redis.del(username));
+        throw new UnauthorizedException();
+      }
+      const parentCanActivate = (await super.canActivate(context)) as boolean;
+      return parentCanActivate;
+    } catch (error) {
+      //jwt 过期抛出错误401
       throw new UnauthorizedException();
     }
-    const tokenCache = username ? await this.redis.get(username) : null;
-    if (!payload || !username || tokenCache !== token) {
-      username && (await this.redis.del(username));
-      throw new UnauthorizedException();
-    }
-    const parentCanActivate = (await super.canActivate(context)) as boolean;
-    return parentCanActivate;
   }
 }

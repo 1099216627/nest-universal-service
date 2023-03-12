@@ -10,6 +10,7 @@ import {
   Put,
   Query,
   UseGuards,
+  Response,
   UseInterceptors,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
@@ -26,6 +27,9 @@ import { UserAction } from '../../common/enum/action.enum';
 import { User } from './entities/users.entity';
 import { setRouteNameDecorator } from '../../decorators/set-route-name.decorator';
 import { GetUser } from 'src/decorators/get-user.decorator';
+import { UpdateUserDto } from './dto/update-user.dto';
+import xlsx from 'node-xlsx';
+import { AccountStatusEnum, GenderEnum } from 'src/common/enum/config.enum';
 
 @Controller('user')
 @UseGuards(JwtGuard, CaslGuard)
@@ -36,18 +40,72 @@ export class UsersController {
     private readonly userService: UsersService,
   ) {}
 
-  @Get('list')
+  @Post('export')
   @Can(UserAction.EXPORT, User)
   @setRouteNameDecorator('导出用户列表')
-  async getUserListByIds(@Query('ids') ids): Promise<ResultData> {
-    return await this.userService.getList(ids);
+  async getUserListByIds(@Body() dto: { ids: number[] }, @Response() res) {
+    //获取用户列表并导出excel
+    const userList: User[] = await this.userService.getList(dto.ids);
+    const titles = [
+      '用户名',
+      '性别',
+      '角色',
+      '昵称',
+      '邮箱',
+      '手机号',
+      '地址',
+      '状态',
+      '注册时间',
+    ];
+    const data = userList.map((item) => {
+      return [
+        item.username,
+        item.profile.gender === GenderEnum.FEMALE ? '女' : '男',
+        item.role.name,
+        item.profile.nickname,
+        item.profile.email,
+        item.profile.phone,
+        item.profile.address,
+        item.status === AccountStatusEnum.ENABLED
+          ? '正常'
+          : item.status === AccountStatusEnum.DISABLE
+          ? '禁用'
+          : '删除',
+        item.createdAt,
+      ];
+    });
+    const options = {
+      '!cols': [
+        { wch: 20 },
+        { wch: 10 },
+        { wch: 20 },
+        { wch: 20 },
+        { wch: 20 },
+        { wch: 20 },
+        { wch: 20 },
+        { wch: 20 },
+        { wch: 20 },
+      ],
+    };
+    const buffer = xlsx.build([
+      { name: '用户列表', data: [titles, ...data], options },
+    ]);
+    res.setHeader(
+      'Content-Type',
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    );
+    res.setHeader(
+      'Content-Disposition',
+      'attachment; filename=' + encodeURIComponent('用户列表.xlsx'),
+    );
+    res.end(buffer, 'binary');
   }
 
   //获取所有用户
   @Get()
   @Can(UserAction.READ, User)
-  @setRouteNameDecorator('查询所有用户')
-  async getAllUsers(
+  @setRouteNameDecorator('查询用户列表')
+  async getUserList(
     @Query() getUsersDto: GetUserDto,
     @GetUser() user,
   ): Promise<ResultData> {
@@ -71,7 +129,16 @@ export class UsersController {
   async createUser(@Body() dto: CreateUserDto): Promise<ResultData> {
     return await this.userService.create(dto);
   }
-
+  //编辑用户
+  @Put(':id')
+  @Can(UserAction.UPDATE, User)
+  @setRouteNameDecorator('编辑用户')
+  async updateUser(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() updateUserDto: UpdateUserDto,
+  ) {
+    return await this.userService.update(id, updateUserDto);
+  }
   @Delete('batch')
   @Can(UserAction.DELETE, User)
   @setRouteNameDecorator('批量删除用户')
