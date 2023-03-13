@@ -17,7 +17,7 @@ export class BaseEntity {
     type: 'enum',
     enum: IsDefaultEnum,
     default: IsDefaultEnum.NO,
-    comment: '是否为默认数据 1是 2否',
+    comment: '是否为默认数据 1是 0否',
   })
   isDefault: IsDefaultEnum;
 

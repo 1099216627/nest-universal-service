@@ -6,6 +6,7 @@ import {
   Get,
   Post,
   Put,
+  Redirect,
   Req,
   Res,
   Response,
@@ -31,7 +32,7 @@ export class AuthController {
   ) {}
 
   @Get('captcha')
-  async getCaptcha(): Promise<ResultData> {
+  async getCaptcha(@Res() res) {
     const { data, text } = svgCaptcha.create({
       size: 4,
       noise: 2,
@@ -45,12 +46,14 @@ export class AuthController {
       id: generateUUID(), // this.utils.generateUUID()
     };
     await this.redis.set(`admin:captcha:img:${result.id}`, text, 'EX', 60 * 5); //验证码有效期5分钟
-    return ResultData.success('获取验证码成功', result);
+    const response = ResultData.success('获取验证码成功', result);
+    res.send(response);
   }
 
   @Post('signin')
   @setRouteNameDecorator('登陆')
   async signin(@Body() signInDto: SigninUserDto, @Req() req, @Res() res) {
+    //重定向到前端路由
     const result = await this.authService.signIn(signInDto, req, res);
     res.send(result);
   }
@@ -81,14 +84,22 @@ export class AuthController {
   @UseGuards(JwtGuard)
   @Post('signout')
   @setRouteNameDecorator('登出')
-  async logout(@Response() res): Promise<ResultData> {
-    return this.authService.logout(res);
+  async logout(@Res() res, @Req() req) {
+    const result = await this.authService.signOut(res, req);
+    res.send(result);
   }
 
-  @UseGuards(JwtGuard)
-  @Get('refreshToken')
-  @setRouteNameDecorator('刷新token')
+  @Post('refresh')
   async refreshToken(@Req() req, @Res() res) {
-    return this.authService.refreshToken(req, res);
+    const result = await this.authService.refreshToken(req, res);
+    res.send(result);
   }
+
+  // @Get('redirect')
+  // redirect(@Req() req, @Res() res) {
+  //   const cookie = req.signedCookies['access_token'];
+  //   if (cookie) {
+  //     res.redirect('/');
+  //   }
+  // }
 }

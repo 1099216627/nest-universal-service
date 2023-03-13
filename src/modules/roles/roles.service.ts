@@ -20,15 +20,9 @@ export class RolesService {
     @InjectRepository(Role) private readonly roleRepository: Repository<Role>,
     private readonly menuService: MenuService,
   ) {}
-  async findOne(condition: number | string): Promise<Role> {
-    let where = {};
-    if (typeof condition === 'number') {
-      where = { id: condition };
-    } else if (typeof condition === 'string') {
-      where = { name: condition };
-    }
+  async findOne(condition: Record<string, any>): Promise<Role> {
     return await this.roleRepository.findOne({
-      where,
+      where: condition,
       relations: ['menus', 'permissions', 'users'],
     });
   }
@@ -38,7 +32,7 @@ export class RolesService {
     updatePermissionDto: UpdatePermissionDto,
   ): Promise<ResultData> {
     const { permissions } = updatePermissionDto;
-    const role = await this.findOne(id);
+    const role = await this.findOne({ id });
     if (!role) {
       return ResultData.error(HttpCodeEnum.BAD_REQUEST, '角色不存在');
     }
@@ -57,7 +51,6 @@ export class RolesService {
     const findPermissions = await this.menuService.findPermissionByIds(
       permissions,
     );
-    console.log(findPermissions, permissions);
 
     role.permissions = findPermissions;
     await this.roleRepository.save(role);
@@ -96,7 +89,7 @@ export class RolesService {
 
   async create(createRoleDto: CreateRoleDto): Promise<ResultData> {
     const { name, menus } = createRoleDto;
-    const findRole = await this.findOne(name);
+    const findRole = await this.findOne({ name });
     if (findRole) {
       return ResultData.error(HttpCodeEnum.BAD_REQUEST, '角色名称重复');
     }
@@ -111,7 +104,7 @@ export class RolesService {
 
   async update(id: number, updateRoleDto: CreateRoleDto): Promise<ResultData> {
     const { name, menus } = updateRoleDto;
-    const role = await this.findOne(id);
+    const role = await this.findOne({ id });
     if (!role) {
       return ResultData.error(HttpCodeEnum.BAD_REQUEST, '角色不存在');
     }
@@ -129,7 +122,7 @@ export class RolesService {
   }
 
   async delete(id: number): Promise<ResultData> {
-    const role = await this.findOne(id);
+    const role = await this.findOne({ id });
     if (!role) {
       return ResultData.error(HttpCodeEnum.BAD_REQUEST, '角色不存在');
     }
@@ -171,7 +164,7 @@ export class RolesService {
   }
 
   async lock(id: number): Promise<ResultData> {
-    const role = await this.findOne(id);
+    const role = await this.findOne({ id });
     if (!role) {
       return ResultData.error(HttpCodeEnum.BAD_REQUEST, '角色不存在');
     }
@@ -184,7 +177,7 @@ export class RolesService {
   }
 
   async unlock(id: number): Promise<ResultData> {
-    const role = await this.findOne(id);
+    const role = await this.findOne({ id });
     if (!role) {
       return ResultData.error(HttpCodeEnum.BAD_REQUEST, '角色不存在');
     }

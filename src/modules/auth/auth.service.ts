@@ -7,16 +7,19 @@ import * as bcrypt from 'bcrypt';
 import { ResultData } from '../../common/utils';
 import { HttpCodeEnum } from '../../common/enum/http-code.enum';
 import { User } from '../users/entities/users.entity';
-import { AccountStatusEnum } from '../../common/enum/config.enum';
+import { AccountStatusEnum, ConfigEnum } from '../../common/enum/config.enum';
 import { InjectRedis, Redis } from '@nestjs-modules/ioredis';
 import * as RequestIp from 'request-ip';
 import { AxiosService } from '../../common/lib/axios/axios.service';
+import { verify } from 'jsonwebtoken';
+import { ConfigService } from '@nestjs/config';
 @Injectable()
 export class AuthService {
   constructor(
     private userService: UsersService,
     private axiosService: AxiosService,
     private jwtService: JwtService,
+    private configService: ConfigService,
     @InjectRedis() private readonly redis: Redis,
   ) {}
   async signIn(
@@ -42,20 +45,20 @@ export class AuthService {
     }
     const payload = { username, sub: user.id };
     const access_token = this.jwtService.sign(payload);
-    await this.redis.set(username, access_token);
+    const refreshToken = this.jwtService.sign(payload, {
+      expiresIn: '7d',
+    });
+
+    await this.redis.set(`access_token_${user.id}`, access_token);
+    await this.redis.set(`refresh_token_${user.id}`, refreshToken);
     const ip = RequestIp.getClientIp(req);
     ip.replace('::ffff:', '');
     const data = await this.axiosService.get(
       `https://sp0.baidu.com/8aQDcjqpAAV3otqbppnN2DJv/api.php?query=${ip}&co=&resource_id=6006&t=1555898284898&ie=utf8&oe=utf8&format=json&tn=baidu`,
     );
-    const area = data[0]?.location;
-    res.cookie('access_token', access_token, {
-      maxAge: 1000 * 60 * 60 * 24 * 7,
-      httpOnly: true,
-      sameSite: 'none',
-      secure: true,
-      signed: true, //签名
-    });
+    const area = data[0]?.location || '未知地区';
+    this.setCookie(res, 'access_token', access_token, 60 * 60 * 1000); //1小时有效权
+    this.setCookie(res, 'refresh_token', refreshToken, 60 * 60 * 1000 * 24 * 7); //7天有效权
     //编辑
     await this.userService.updater(user.id, {
       lastLoginTime: new Date(),
@@ -105,12 +108,6 @@ export class AuthService {
     return ResultData.success('修改成功');
   }
 
-  async logout(res): Promise<ResultData> {
-    const user = res.req.user;
-    await this.redis.del(user.username);
-    return ResultData.success('退出成功');
-  }
-
   async checkCaptcha(codeId: string, code: string): Promise<ResultData> {
     const captcha = await this.redis.get(`admin:captcha:img:${codeId}`);
     if (!captcha) {
@@ -124,11 +121,48 @@ export class AuthService {
     return ResultData.success('验证码正确');
   }
 
-  async refreshToken(req, res) {
+  async signOut(res, req): Promise<ResultData> {
     const user = req.user;
+    await this.redis.del(`refresh_token_${user.id}`);
+    await this.redis.del(`access_token_${user.id}`);
+    this.setCookie(res, 'access_token', '', 0);
+    this.setCookie(res, 'refresh_token', '', 0);
+    return ResultData.success('退出成功');
+  }
+
+  async refreshToken(req, res): Promise<ResultData> {
+    const refreshToken = req.signedCookies['refresh_token'];
+    if (!refreshToken) {
+      throw new HttpException('请先登录', 401);
+    }
+
+    const { sub } = await verify(
+      refreshToken,
+      this.configService.get(ConfigEnum.JWT_SECRET),
+    );
+
+    const user = await this.userService.findOne(sub);
+    if (!user) {
+      throw new HttpException('用户不存在', 401);
+    }
+    const accessToken = await this.redis.get(`access_token_${user.id}`);
+    if (!accessToken) {
+      throw new HttpException('请先登录', 401);
+    }
     const payload = { username: user.username, sub: user.id };
     const access_token = this.jwtService.sign(payload);
-    await this.redis.set(user.username, access_token);
+    await this.redis.set(`access_token_${user.id}`, access_token);
+    this.setCookie(res, 'access_token', access_token, 60 * 60 * 1000); //1小时有效权
     return ResultData.success('刷新成功', { access_token });
+  }
+
+  setCookie(res, key, value, maxAge) {
+    res.cookie(key, value, {
+      maxAge,
+      httpOnly: true,
+      sameSite: 'none',
+      secure: true,
+      signed: true, //签名
+    });
   }
 }

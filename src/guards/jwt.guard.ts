@@ -28,16 +28,15 @@ export class JwtGuard extends AuthGuard('jwt') {
         token,
         this.configService.get(ConfigEnum.JWT_SECRET),
       );
-
       const username = payload['username'];
       const id = payload['sub'];
       const user = await this.usersService.findOne(id);
       if (!user || user.status !== AccountStatusEnum.ENABLED) {
         throw new UnauthorizedException();
       }
-      const tokenCache = username ? await this.redis.get(username) : null;
+      const tokenCache = id ? await this.redis.get(`access_token_${id}`) : null;
       if (!payload || !username || tokenCache !== token) {
-        username && (await this.redis.del(username));
+        username && (await this.redis.del(`access_token_${id}`));
         throw new UnauthorizedException();
       }
       const parentCanActivate = (await super.canActivate(context)) as boolean;

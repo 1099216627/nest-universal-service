@@ -23,7 +23,7 @@ export class ProfileController {
 
   @Put()
   @setRouteNameDecorator('修改个人资料')
-  async updatePassword(
+  async updateProfile(
     @GetUser() userInfo,
     @Body() updateProfileDto: UpdateProfileDto,
   ): Promise<ResultData> {

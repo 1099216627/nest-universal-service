@@ -155,21 +155,21 @@ export class UsersController {
   }
 
   @Put('disable/:id')
-  @Can(UserAction.STATUS, User)
+  @Can(UserAction.DISABLE, User)
   @setRouteNameDecorator('禁用用户')
   async disableUser(@Param('id') id: number): Promise<ResultData> {
     return await this.userService.disableUser(id);
   }
 
   @Put('enable/:id')
-  @Can(UserAction.STATUS, User)
+  @Can(UserAction.ENABLE, User)
   @setRouteNameDecorator('启用用户')
   async enableUser(@Param('id') id: number): Promise<ResultData> {
     return await this.userService.enableUser(id);
   }
 
   @Put('recover/:id')
-  @Can(UserAction.STATUS, User)
+  @Can(UserAction.RECOVER, User)
   @setRouteNameDecorator('恢复用户')
   async recoverUser(@Param('id') id: number): Promise<ResultData> {
     return await this.userService.recoverUser(id);

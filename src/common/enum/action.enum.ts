@@ -4,7 +4,9 @@ export enum UserAction {
   UPDATE = 'update',
   DELETE = 'delete',
   EXPORT = 'export',
-  STATUS = 'status',
+  DISABLE = 'disable',
+  ENABLE = 'enable',
+  RECOVER = 'recover',
 }
 
 export enum RoleAction {

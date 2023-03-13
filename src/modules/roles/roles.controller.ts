@@ -80,7 +80,7 @@ export class RolesController {
   @Get(':id')
   @setRouteNameDecorator('查询角色')
   async findOneRole(@Param('id', ParseIntPipe) id: number) {
-    const result = await this.rolesService.findOne(id);
+    const result = await this.rolesService.findOne({ id });
     return ResultData.success('获取用户信息成功', result);
   }
 

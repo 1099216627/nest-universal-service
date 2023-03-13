@@ -15,7 +15,10 @@ import { RolesService } from '../roles/roles.service';
 import * as bcrypt from 'bcrypt';
 import { ProfileService } from '../profile/profile.service';
 import { HttpCodeEnum } from '../../common/enum/http-code.enum';
-import { AccountStatusEnum } from '../../common/enum/config.enum';
+import {
+  AccountStatusEnum,
+  IsDefaultEnum,
+} from '../../common/enum/config.enum';
 import { BatchDeleteDto } from './dto/batch-delete.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 
@@ -69,7 +72,10 @@ export class UsersService {
     const { roleId, username, password, nickname, avatar, gender } = dto;
     const findUser = await this.userRepository.findOne({ where: { username } });
     if (findUser) {
-      return ResultData.error(HttpCodeEnum.BAD_REQUEST, '用户名已存在');
+      return ResultData.error(
+        HttpCodeEnum.BAD_REQUEST,
+        '用户名已存在，请直接前往登录',
+      );
     }
     if (!isVoid(nickname)) {
       const findProfile = await this.profileService.findOneByNickname(nickname);
@@ -80,11 +86,21 @@ export class UsersService {
     const user = await this.userRepository.create({ username, password });
     const salt = await bcrypt.genSalt();
     user.password = await bcrypt.hash(user.password, salt);
-    const role = await this.roleService.findOne(roleId);
+    //identification: 'user' 为默认角色
+    const role = await this.roleService.findOne(
+      roleId ? { id: roleId } : { identification: 'user' },
+    );
     user.profile = await this.profileService.create();
-    if (role) {
-      user.role = role;
+    if (!role) {
+      return ResultData.error(HttpCodeEnum.NOT_FOUND, '角色不存在');
     }
+    if (role.status === 0 && role.isDefault !== IsDefaultEnum.YES) {
+      return ResultData.error(
+        HttpCodeEnum.BAD_REQUEST,
+        '角色已锁定，无法分配角色',
+      );
+    }
+    user.role = role;
     if (!isVoid(nickname)) {
       user.profile.nickname = nickname;
     } else {
@@ -106,9 +122,15 @@ export class UsersService {
     if (!findUser) {
       return ResultData.error(HttpCodeEnum.NOT_FOUND, '编辑用户不存在');
     }
-    const findRole = await this.roleService.findOne(roleId);
+    const findRole = await this.roleService.findOne({ id: roleId });
     if (!findRole) {
       return ResultData.error(HttpCodeEnum.NOT_FOUND, '所选角色不存在');
+    }
+    if (findRole.status === 0 && findRole.isDefault !== IsDefaultEnum.YES) {
+      return ResultData.error(
+        HttpCodeEnum.BAD_REQUEST,
+        '所选角色已锁定，无法分配角色',
+      );
     }
     findUser.profile.gender = gender;
     findUser.profile.avatar = avatar;
@@ -193,7 +215,6 @@ export class UsersService {
   }
 
   async updater(id: number, params: Partial<User>) {
-    //在这里编辑用户信息
     return await this.userRepository.update(id, params);
   }
 }

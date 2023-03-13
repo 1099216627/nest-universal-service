@@ -16,6 +16,9 @@ export class Permission extends BaseEntity {
   @Column()
   controller: string;
 
+  @Column()
+  group: string;
+
   @ManyToMany(() => Role, (role) => role.permissions, {
     onUpdate: 'CASCADE',
     onDelete: 'CASCADE',
