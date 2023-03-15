@@ -38,6 +38,7 @@ export class CaslGuard implements CanActivate {
       [context.getClass(), context.getHandler()],
     ) as CaslType;
     let flag = true;
+
     // 如果没有设置权限检查，直接放行
     if (!handlers && !canHandlers && !cannotHandlers) {
       return flag;

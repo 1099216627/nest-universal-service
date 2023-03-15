@@ -8,6 +8,8 @@ export class SigninUserDto {
   })
   username: string;
 
+  sevenDays: boolean;
+
   @IsString()
   @IsNotEmpty()
   @Length(6, 20, {

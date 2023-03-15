@@ -6,20 +6,19 @@ import { AllExceptionFilter } from './filters/all-exception.filter';
 import rateLimit from 'express-rate-limit';
 import helmet from 'helmet';
 import * as cookieParser from 'cookie-parser';
-import * as fs from 'fs';
 // const httpsOptions = {
 //   cert: fs.readFileSync('./ssl/cert.pem'),
 //   key: fs.readFileSync('./ssl/key.pem'),
 // };
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {});
-  app.enableCors({
-    origin: ['https://www.jerry-cabin.top', 'http://127.0.0.1:4000'],
-    credentials: true,
-    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-    allowedHeaders: 'Content-Type, Authorization, Accept',
-    maxAge: 3600,
-  });
+  // app.enableCors({
+  //   origin: ['https://www.jerry-cabin.top', 'http://127.0.0.1:4000'],
+  //   credentials: true,
+  //   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+  //   allowedHeaders: 'Content-Type, Authorization, Accept',
+  //   maxAge: 3600,
+  // });
   //cors配置，仅让jerry-cabin.top域名访问
   app.useLogger(app.get(WINSTON_MODULE_NEST_PROVIDER));
   app.setGlobalPrefix('api/v1');

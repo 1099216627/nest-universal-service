@@ -20,7 +20,9 @@ import { CaslService } from './casl.service';
       inject: [ConfigService],
       useFactory: async (configService: ConfigService) => ({
         secret: configService.get<string>(ConfigEnum.JWT_SECRET),
-        signOptions: { expiresIn: '1h' },
+        signOptions: {
+          expiresIn: '1h', // 1小时
+        },
       }),
     }),
   ],

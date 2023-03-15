@@ -9,8 +9,6 @@ export class TasksService {
   //每小时执行一次
   @Cron(CronExpression.EVERY_HOUR)
   async handleCron() {
-    console.log('定时任务开始');
-
     await this.loggerService.deleteAll();
   }
 }

@@ -22,7 +22,6 @@ export class UploadService {
         dataRedundancyType: 'ZRS', // 存储空间的默认数据容灾类型为本地冗余存储，即LRS。如果需要设置数据容灾类型为同城冗余存储，请替换为ZRS。
       };
       const result = await this.client.putBucket('test');
-      console.log(result);
     } catch (err) {
       console.log(err);
     }
@@ -31,7 +30,6 @@ export class UploadService {
   private async listBuckets() {
     try {
       const result = await this.client.listBuckets();
-      console.log(result);
     } catch (err) {
       console.log(err);
     }

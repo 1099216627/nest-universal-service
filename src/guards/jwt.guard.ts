@@ -5,7 +5,6 @@ import { ExecutionContext, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { AuthGuard } from '@nestjs/passport';
 import { verify } from 'jsonwebtoken';
-import { ExtractJwt } from 'passport-jwt';
 import { ConfigEnum } from 'src/common/enum/config.enum';
 
 export class JwtGuard extends AuthGuard('jwt') {
@@ -23,27 +22,26 @@ export class JwtGuard extends AuthGuard('jwt') {
     if (!token) {
       throw new UnauthorizedException();
     }
-    try {
-      const payload = await verify(
-        token,
-        this.configService.get(ConfigEnum.JWT_SECRET),
-      );
-      const username = payload['username'];
-      const id = payload['sub'];
-      const user = await this.usersService.findOne(id);
-      if (!user || user.status !== AccountStatusEnum.ENABLED) {
-        throw new UnauthorizedException();
-      }
-      const tokenCache = id ? await this.redis.get(`access_token_${id}`) : null;
-      if (!payload || !username || tokenCache !== token) {
-        username && (await this.redis.del(`access_token_${id}`));
-        throw new UnauthorizedException();
-      }
-      const parentCanActivate = (await super.canActivate(context)) as boolean;
-      return parentCanActivate;
-    } catch (error) {
-      //jwt 过期抛出错误401
+
+    const payload = await verify(
+      token,
+      this.configService.get(ConfigEnum.JWT_SECRET),
+    );
+
+    const username = payload['username'];
+    const id = payload['sub'];
+    const user = await this.usersService.findOne(id);
+    if (!user || user.status !== AccountStatusEnum.ENABLED) {
       throw new UnauthorizedException();
     }
+
+    const tokenCache = id ? await this.redis.get(`access_token_${id}`) : null;
+    if (!payload || !username || tokenCache !== token || !id) {
+      id && (await this.redis.del(`access_token_${id}`));
+      throw new UnauthorizedException();
+    }
+    //加入bearer token
+    request.headers.authorization = `Bearer ${token}`;
+    return (await super.canActivate(context)) as boolean;
   }
 }

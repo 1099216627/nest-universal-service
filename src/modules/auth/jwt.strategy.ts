@@ -12,7 +12,12 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     private readonly authService: AuthService,
   ) {
     super({
-      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+      //从请求头Cookie中获取token
+      jwtFromRequest: ExtractJwt.fromExtractors([
+        (req) => {
+          return req?.signedCookies?.access_token;
+        },
+      ]),
       ignoreExpiration: false,
       secretOrKey: configService.get<string>(ConfigEnum.JWT_SECRET),
     });

@@ -7,19 +7,16 @@ import * as bcrypt from 'bcrypt';
 import { ResultData } from '../../common/utils';
 import { HttpCodeEnum } from '../../common/enum/http-code.enum';
 import { User } from '../users/entities/users.entity';
-import { AccountStatusEnum, ConfigEnum } from '../../common/enum/config.enum';
+import { AccountStatusEnum } from '../../common/enum/config.enum';
 import { InjectRedis, Redis } from '@nestjs-modules/ioredis';
 import * as RequestIp from 'request-ip';
 import { AxiosService } from '../../common/lib/axios/axios.service';
-import { verify } from 'jsonwebtoken';
-import { ConfigService } from '@nestjs/config';
 @Injectable()
 export class AuthService {
   constructor(
     private userService: UsersService,
     private axiosService: AxiosService,
     private jwtService: JwtService,
-    private configService: ConfigService,
     @InjectRedis() private readonly redis: Redis,
   ) {}
   async signIn(
@@ -27,7 +24,7 @@ export class AuthService {
     req: Request,
     res: any,
   ): Promise<ResultData> {
-    const { username, password, code, codeId } = signInDto;
+    const { username, password, code, codeId, sevenDays = false } = signInDto;
     await this.checkCaptcha(code, codeId);
     const user = await this.userService.findOneByUsername(username);
     if (!user) {
@@ -43,22 +40,47 @@ export class AuthService {
     if (!isMatch) {
       return ResultData.error(HttpCodeEnum.UNAUTHORIZED, '用户名或密码错误');
     }
-    const payload = { username, sub: user.id };
+    const payload = {
+      username,
+      sub: user.id,
+      iat: Date.now(),
+    };
     const access_token = this.jwtService.sign(payload);
-    const refreshToken = this.jwtService.sign(payload, {
-      expiresIn: '7d',
-    });
-
-    await this.redis.set(`access_token_${user.id}`, access_token);
-    await this.redis.set(`refresh_token_${user.id}`, refreshToken);
+    await this.redis.set(
+      `access_token_${user.id}`,
+      access_token,
+      'EX',
+      60 * 60,
+    );
     const ip = RequestIp.getClientIp(req);
     ip.replace('::ffff:', '');
     const data = await this.axiosService.get(
       `https://sp0.baidu.com/8aQDcjqpAAV3otqbppnN2DJv/api.php?query=${ip}&co=&resource_id=6006&t=1555898284898&ie=utf8&oe=utf8&format=json&tn=baidu`,
     );
     const area = data[0]?.location || '未知地区';
-    this.setCookie(res, 'access_token', access_token, 60 * 60 * 1000); //1小时有效权
-    this.setCookie(res, 'refresh_token', refreshToken, 60 * 60 * 1000 * 24 * 7); //7天有效权
+    this.setCookie(res, 'access_token', access_token, 60 * 60 * 1000 * 24); //1小时有效权
+    if (sevenDays) {
+      const newPayload = {
+        ...payload,
+        type: 'refresh',
+        iat: Date.now(),
+      };
+      const refreshToken = this.jwtService.sign(newPayload, {
+        expiresIn: '7d',
+      });
+      await this.redis.set(
+        `refresh_token_${user.id}`,
+        refreshToken,
+        'EX',
+        60 * 60 * 24 * 7,
+      );
+      this.setCookie(
+        res,
+        'refresh_token',
+        refreshToken,
+        60 * 60 * 1000 * 24 * 7,
+      ); //7天有效权
+    }
     //编辑
     await this.userService.updater(user.id, {
       lastLoginTime: new Date(),
@@ -133,26 +155,27 @@ export class AuthService {
   async refreshToken(req, res): Promise<ResultData> {
     const refreshToken = req.signedCookies['refresh_token'];
     if (!refreshToken) {
-      throw new HttpException('请先登录', 401);
+      throw new HttpException('用户身份已过期，请重新登录', 401);
     }
-
-    const { sub } = await verify(
-      refreshToken,
-      this.configService.get(ConfigEnum.JWT_SECRET),
-    );
-
+    const { sub } = this.jwtService.verify(refreshToken);
     const user = await this.userService.findOne(sub);
     if (!user) {
-      throw new HttpException('用户不存在', 401);
+      throw new HttpException('用户身份已过期，请重新登录', 401);
     }
-    const accessToken = await this.redis.get(`access_token_${user.id}`);
-    if (!accessToken) {
-      throw new HttpException('请先登录', 401);
+    const cacheRefreshToken = await this.redis.get(`refresh_token_${user.id}`);
+    if (cacheRefreshToken !== refreshToken) {
+      throw new HttpException('用户身份已过期，请重新登录', 401);
     }
-    const payload = { username: user.username, sub: user.id };
+    //重新生成token
+    const payload = { username: user.username, sub: user.id, iat: Date.now() };
     const access_token = this.jwtService.sign(payload);
-    await this.redis.set(`access_token_${user.id}`, access_token);
-    this.setCookie(res, 'access_token', access_token, 60 * 60 * 1000); //1小时有效权
+    await this.redis.set(
+      `access_token_${user.id}`,
+      access_token,
+      'EX',
+      60 * 60,
+    );
+    this.setCookie(res, 'access_token', access_token, 60 * 60 * 1000 * 24); //1小时有效权
     return ResultData.success('刷新成功', { access_token });
   }
 
