@@ -12,13 +12,14 @@ import * as cookieParser from 'cookie-parser';
 // };
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {});
-  // app.enableCors({
-  //   origin: ['https://www.jerry-cabin.top', 'http://127.0.0.1:4000'],
-  //   credentials: true,
-  //   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-  //   allowedHeaders: 'Content-Type, Authorization, Accept',
-  //   maxAge: 3600,
-  // });
+  app.enableCors({
+    origin: 'https://www.jerry-cabin.top',
+    credentials: true, //允许跨域携带cookie
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    allowedHeaders: 'Content-Type,Authorization',
+    maxAge: 3600,
+    // preflightContinue: false,
+  });
   //cors配置，仅让jerry-cabin.top域名访问
   app.useLogger(app.get(WINSTON_MODULE_NEST_PROVIDER));
   app.setGlobalPrefix('api/v1');
